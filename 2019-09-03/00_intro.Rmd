@@ -118,7 +118,7 @@ ggplot(cpu, aes(x=date_of_introduction, y=transistor_count)) +
 - R4DS slack канал наменет за почетници што вежбаа со #TidyTuesday
 - R for Data science (https://r4ds.had.co.nz/)
 - Advanced R (http://adv-r.had.co.nz/)
-- TidyTuesday podcast ()
+- TidyTuesday podcast (https://podtail.com/podcast/tidy-tuesday/)
 
 
 ## Други ресурси што ги искористивме
