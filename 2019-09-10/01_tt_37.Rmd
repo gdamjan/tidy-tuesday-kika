@@ -207,6 +207,29 @@ tx_injuries %>% select(age, gender, injury_date) %>%
     facet_wrap("gender", ncol=2)
 ```
 
+## The code 6 - графици #5
+
+Homework: What was potentially wrong with the assumptions for the previous graph?
+
+## The code 7 - графици #6
+
+```{r, echo=TRUE, eval=FALSE}
+library(tidyverse)
+library(ggridges)
+library(lubridate)
+
+tx_injuries %>% select(age, gender, injury_date) %>% 
+  mutate(Month=month.name[month(injury_date)]) %>% 
+  mutate(Year=factor(year(injury_date))) %>% 
+  drop_na(Month, Year, gender) %>% 
+  group_by(Year, Month, gender) %>% 
+  tally() %>% 
+  ggplot(data=.) + 
+    geom_tile(aes(y=Month, x=Year, fill=n), color="white") +
+    facet_wrap("gender", ncol=2) +
+      theme_classic()
+```
+
 
 ## R референци
 
