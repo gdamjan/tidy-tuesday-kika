@@ -1,0 +1,191 @@
+---
+title: "#TidyTuesday 2 / 10.9.2019: Week 37 Amusement Park Injuries"
+author: "novica"
+date: "10/9/2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+##
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">(1/n) Michael Pollan’s advice if he taught <a href="https://twitter.com/hashtag/Rstats?src=hash&amp;ref_src=twsrc%5Etfw">#Rstats</a>/<a href="https://twitter.com/hashtag/Python?src=hash&amp;ref_src=twsrc%5Etfw">#Python</a> programming for <a href="https://twitter.com/datacarpentry?ref_src=twsrc%5Etfw">@datacarpentry</a>:<br>1. Write code<br>2. Not too much<br>3. Mostly plots</p>&mdash; Dr. Michael Koontz (@_mikoontz) <a href="https://twitter.com/_mikoontz/status/758021742078025728?ref_src=twsrc%5Etfw">July 26, 2016</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+## Recap
+
+- .Rmd (R Markdown) е околината во која ќе работиме;
+- Нов R Notebook: Мени: File -> New File -> R notebook
+- Корисни кратенки:
+  - code chunks (ctrl+alt+i)
+  - pipes (ctrl+shift+m)
+  - view()
+
+## Околината на RStudio
+
+- Отвори RStudio
+
+## The tidyverse
+
+![tidiverse workflow](01_tt_37_files/Screenshot_20190909_195556.png)
+
+The tidyverse is an “opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures.” (source: https://thomasmock.netlify.com/post/tidytuesday-a-weekly-social-data-project-in-r/)
+
+## TidyTuesday 37 недела, 2 пат КИКА
+
+- Податоци: https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10
+- Добар пример за тоа ако на пример работите во осигурителна куќа и ви речат ајде да видиме што да се прави за полиси за осигурување за повреди во забавни паркови.
+
+## TidyTuesday hints за новите податоци
+
+A lot of free text this week, some inconsistent NAs (n/a, N/A) and dates (ymd, dmy). A good chance to do some data cleaning and then take a look at frequency, type of injury, and analyze free text.
+
+## The code 1
+
+Load the libraries
+
+```{r, echo=TRUE, eval=FALSE}
+library(tidyverse)
+```
+
+## The code 2
+
+Load the data from github (*NOTE: lines are broken for readibility*)
+
+```{r, echo=TRUE, eval=FALSE}
+tx_injuries <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv")
+
+safer_parks <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
+```
+
+## The code 3 - чистење на податоците #1 
+
+1. Среди ги сите NA вредности
+
+Прашање: Колку сѐ можни форми на NA има во податоците?
+
+```{r, echo=TRUE, eval=FALSE}
+glimpse(tx_injuries)
+map(tx_injuries, unique)
+```
+
+## The code 3 - чистење на податоците #2
+
+"N/A", "n/a" - колку што можевме да видиме?  **na_if**
+
+```{r, echo=TRUE, eval=FALSE}
+tx_injuries <- tx_injuries %>% 
+    mutate(age = na_if(age, "n/a")) %>% 
+    mutate(age = na_if(age, "N/A")) %>% 
+    mutate(age = na_if(age, "0")) %>% 
+    mutate(age = as.numeric(age)) %>% 
+    mutate(gender = na_if(gender, "n/a")) %>% 
+    mutate(gender = na_if(gender, "N/A")) %>% 
+    mutate(gender=str_to_upper(gender)) %>%
+    mutate(gender = as_factor(gender)) %>% 
+    mutate(injury_date = na_if(injury_date, "n/a")) %>% 
+    mutate(injury_date = na_if(injury_date, "#########")) 
+
+map(tx_injuries, unique)
+```
+
+## The code 3 - чистење на податоците #3
+
+Комплицирано и компјутеризирано барање на NA (за домашна :))
+
+```{r, echo=TRUE, eval=FALSE}
+# make a function to mutate a column to fix NAs
+fix_na <- function(vect, na_strings) {
+  vect[vect %in% na_strings] <- NA
+  return(vect)
+}
+
+# find possible NA values
+possible_na <-
+  tx_injuries %>%
+  gather(col_name, value) %>%
+  filter(str_detect(value, "^n|^N"), str_length(value) < 5) %>%
+  distinct(value, .keep_all = FALSE) %>%
+  filter(!value %in% c("Neck", "Nose", "neck")) %>%
+  unlist %>%
+  unname()
+
+tx_injuries_na_fixed <- tx_injuries %>% mutate_all(.funs = fix_na, na_strings = possible_na)
+```
+
+## The code 3 - чистење на податоците #4
+
+Датуми - **lubridate**
+
+```{r, echo=TRUE, eval=FALSE}
+library(lubridate)
+
+tx_injuries$injury_date
+
+tx_injuries <- tx_injuries %>% 
+    mutate(injury_date = case_when(
+      str_length(injury_date) == 5 ~ as_date(as.numeric(injury_date), origin='1899-12-30'),
+      str_detect(injury_date, "/") == TRUE ~ mdy(injury_date),
+      TRUE ~ as.Date(NA)
+      ))
+      
+
+tx_injuries$injury_date
+```
+
+
+## The code 4 - графици #1
+
+Ако се присетите на чистењето на податоците, некако излегува дека решивме да работиме со три променливи кои се различни по тип: `age`, `gender`, `injury_date`.
+
+```{r, echo=TRUE, eval=FALSE}
+glimpse(tx_injuries)
+```
+
+![glimpse](01_tt_37_files/Screenshot_20190910_113458.png)
+
+## The code 4 - графици #2
+
+Template за графици
+
+```{r, echo=TRUE, eval=FALSE}
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+```
+
+Извор: https://r4ds.had.co.nz/data-visualisation.html#first-steps
+
+
+## The code 4 - графици #3
+
+```{r, echo=TRUE, eval=FALSE}
+ggplot(data = tx_injuries) + 
+  geom_histogram(mapping = aes(x = age, fill = gender), na.rm = TRUE) +
+  labs(x="Години", y="Број") +
+  labs(title="Број на повреди по години по пол", fill = "Пол") +
+  theme_minimal()
+#овде сакам да ги нема NA ? и како беше да се направи граница околу bin-овите?
+```
+
+
+## The code 4 - графици #4
+
+```{r, echo=TRUE, eval=FALSE}
+ggplot(data = tx_injuries) + 
+  geom_point(mapping = aes(x = injury_date, y = age)) +
+  labs(x="Година", y="Возраст") +
+  labs(title="Повреди по години по возраст") +
+  theme_minimal()
+# боја по пол? дали можеме некако да зумираме дека личи како патерн по средина можда летни месеци се тоа?
+```
+
+## R референци
+
+- R4DS slack канал наменет за почетници што вежбаа со #TidyTuesday
+- R for Data science (https://r4ds.had.co.nz/)
+- Advanced R (http://adv-r.had.co.nz/)
+- TidyTuesday podcast (https://podtail.com/podcast/tidy-tuesday/)
+
