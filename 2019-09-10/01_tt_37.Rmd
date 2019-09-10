@@ -158,29 +158,55 @@ ggplot(data = <DATA>) +
 
 Извор: https://r4ds.had.co.nz/data-visualisation.html#first-steps
 
+MAPPING: A `variable` is _mapped_ onto a `geom`. 
+
+Examples: `age` is mapped to `x`, `gender` is mapped to `fill`
+
+Many `geoms`. They have a corresponding `stat` function that transforms the data to make it suitable for the `geom` (?stat_boxplot)
+
 
 ## The code 4 - графици #3
 
 ```{r, echo=TRUE, eval=FALSE}
-ggplot(data = tx_injuries) + 
-  geom_histogram(mapping = aes(x = age, fill = gender), na.rm = TRUE) +
+ggplot(data = drop_na(tx_injuries, gender)) + 
+  geom_histogram(mapping = aes(x = age, fill = gender), na.rm = TRUE, color="white") +
   labs(x="Години", y="Број") +
   labs(title="Број на повреди по години по пол", fill = "Пол") +
   theme_minimal()
-#овде сакам да ги нема NA ? и како беше да се направи граница околу bin-овите?
+#овде сакам да ги нема NA ? 
 ```
 
 
 ## The code 4 - графици #4
 
 ```{r, echo=TRUE, eval=FALSE}
-ggplot(data = tx_injuries) + 
-  geom_point(mapping = aes(x = injury_date, y = age)) +
+ggplot(data = drop_na(tx_injuries, gender)) + 
+  geom_point(mapping = aes(x = injury_date, y = age, color=gender)) +
   labs(x="Година", y="Возраст") +
   labs(title="Повреди по години по возраст") +
   theme_minimal()
 # боја по пол? дали можеме некако да зумираме дека личи како патерн по средина можда летни месеци се тоа?
 ```
+
+## The code 5 - графици #5
+
+```{r, echo=TRUE, eval=FALSE}
+#install.packages("ggridges")
+library(tidyverse)
+library(ggridges)
+library(lubridate)
+
+tx_injuries %>% select(age, gender, injury_date) %>% 
+  mutate(Month=month.name[month(injury_date)]) %>% 
+  mutate(Year=factor(year(injury_date))) %>% 
+  group_by(Year) %>% 
+  mutate(Day_of_year=injury_date-min(injury_date)) %>% 
+  drop_na() %>% 
+  ggplot(data=.) + 
+    geom_density_ridges(mapping = aes(x=Day_of_year, y=Year, fill=gender), alpha=.5) +
+    facet_wrap("gender", ncol=2)
+```
+
 
 ## R референци
 
