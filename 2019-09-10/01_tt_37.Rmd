@@ -173,7 +173,6 @@ ggplot(data = drop_na(tx_injuries, gender)) +
   labs(x="Години", y="Број") +
   labs(title="Број на повреди по години по пол", fill = "Пол") +
   theme_minimal()
-#овде сакам да ги нема NA ? 
 ```
 
 
@@ -181,28 +180,27 @@ ggplot(data = drop_na(tx_injuries, gender)) +
 
 ```{r, echo=TRUE, eval=FALSE}
 ggplot(data = drop_na(tx_injuries, gender)) + 
-  geom_point(mapping = aes(x = injury_date, y = age, color=gender)) +
+  geom_point(mapping = aes(x = age, y = injury_date, color=gender)) +
   labs(x="Година", y="Возраст") +
   labs(title="Повреди по години по возраст") +
+  #facet_wrap("gender", ncol=2)
   theme_minimal()
-# боја по пол? дали можеме некако да зумираме дека личи како патерн по средина можда летни месеци се тоа?
 ```
 
 ## The code 5 - графици #5
 
 ```{r, echo=TRUE, eval=FALSE}
 #install.packages("ggridges")
-library(tidyverse)
-library(ggridges)
-library(lubridate)
 
-tx_injuries %>% select(age, gender, injury_date) %>% 
-  mutate(Month=month.name[month(injury_date)]) %>% 
-  mutate(Year=factor(year(injury_date))) %>% 
-  group_by(Year) %>% 
-  mutate(Day_of_year=injury_date-min(injury_date)) %>% 
-  drop_na() %>% 
-  ggplot(data=.) + 
+library(ggridges)
+
+tx_injuries %>% select(age, gender, injury_date) %>%
+  mutate(Month=month.name[month(injury_date)]) %>%
+  mutate(Year=factor(year(injury_date))) %>%
+  group_by(Year) %>%
+  mutate(Day_of_year=injury_date-min(injury_date)) %>%
+  drop_na(Year, Day_of_year, gender) %>%
+  ggplot(data=.) +
     geom_density_ridges(mapping = aes(x=Day_of_year, y=Year, fill=gender), alpha=.5) +
     facet_wrap("gender", ncol=2)
 ```
@@ -214,9 +212,8 @@ Homework: What was potentially wrong with the assumptions for the previous graph
 ## The code 7 - графици #6
 
 ```{r, echo=TRUE, eval=FALSE}
-library(tidyverse)
+
 library(ggridges)
-library(lubridate)
 
 tx_injuries %>% select(age, gender, injury_date) %>% 
   mutate(Month=month.name[month(injury_date)]) %>% 
