@@ -3119,6 +3119,16 @@ slide:not(.current) .plotly.html-widget{
           </hgroup>
   </slide>
 
+<<<<<<< Updated upstream
+=======
+<style>
+    slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+</style>
+
+>>>>>>> Stashed changes
 <slide class=""><hgroup><h2></h2></hgroup><article  id="section">
 
 <blockquote class="twitter-tweet" data-lang="en">
@@ -3164,7 +3174,11 @@ slide:not(.current) .plotly.html-widget{
 </article></slide><slide class=""><hgroup><h2>TidyTuesday 37 недела, 2 пат КИКА</h2></hgroup><article  id="tidytuesday-37--2--">
 
 <ul>
+<<<<<<< Updated upstream
 <li>Податоци: <a href='https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10' title=''>https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10</a></li>
+=======
+<li>Податоци на <a href='https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10' title=''>github</a></li>
+>>>>>>> Stashed changes
 <li>Добар пример за тоа ако на пример работите во осигурителна куќа и ви речат ајде да видиме што да се прави за полиси за осигурување за повреди во забавни паркови.</li>
 </ul>
 
@@ -3182,9 +3196,19 @@ slide:not(.current) .plotly.html-widget{
 
 <p>Load the data from github (<em>NOTE: lines are broken for readibility</em>)</p>
 
+<<<<<<< Updated upstream
 <pre class = 'prettyprint lang-r'>tx_injuries &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv&quot;)
 
 safer_parks &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/saferparks.csv&quot;)</pre>
+=======
+<pre class = 'prettyprint lang-r'>tx_injuries &lt;- 
+readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/
+tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv&quot;)
+
+safer_parks &lt;- 
+readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/
+tidytuesday/master/data/2019/2019-09-10/saferparks.csv&quot;)</pre>
+>>>>>>> Stashed changes
 
 </article></slide><slide class=""><hgroup><h2>The code 3 - чистење на податоците #1</h2></hgroup><article  id="the-code-3------1">
 
@@ -3235,7 +3259,12 @@ possible_na &lt;-
   unlist %&gt;%
   unname()
 
+<<<<<<< Updated upstream
 tx_injuries_na_fixed &lt;- tx_injuries %&gt;% mutate_all(.funs = fix_na, na_strings = possible_na)</pre>
+=======
+tx_injuries_na_fixed &lt;- tx_injuries %&gt;% 
+  mutate_all(.funs = fix_na, na_strings = possible_na)</pre>
+>>>>>>> Stashed changes
 
 </article></slide><slide class=""><hgroup><h2>The code 3 - чистење на податоците #4</h2></hgroup><article  id="the-code-3------4">
 
@@ -3247,7 +3276,12 @@ tx_injuries$injury_date
 
 tx_injuries &lt;- tx_injuries %&gt;% 
     mutate(injury_date = case_when(
+<<<<<<< Updated upstream
       str_length(injury_date) == 5 ~ as_date(as.numeric(injury_date), origin=&#39;1899-12-30&#39;),
+=======
+      str_length(injury_date) == 5 ~ as_date(
+        as.numeric(injury_date), origin=&#39;1899-12-30&#39;),
+>>>>>>> Stashed changes
       str_detect(injury_date, &quot;/&quot;) == TRUE ~ mdy(injury_date),
       TRUE ~ as.Date(NA)
       ))
@@ -3281,7 +3315,12 @@ tx_injuries$injury_date</pre>
 </article></slide><slide class=""><hgroup><h2>The code 4 - графици #3</h2></hgroup><article  id="the-code-4----3">
 
 <pre class = 'prettyprint lang-r'>ggplot(data = drop_na(tx_injuries, gender)) + 
+<<<<<<< Updated upstream
   geom_histogram(mapping = aes(x = age, fill = gender), na.rm = TRUE, color=&quot;white&quot;) +
+=======
+  geom_histogram(mapping = aes(x = age, fill = gender), 
+                 na.rm = TRUE, color=&quot;white&quot;) +
+>>>>>>> Stashed changes
   labs(x=&quot;Години&quot;, y=&quot;Број&quot;) +
   labs(title=&quot;Број на повреди по години по пол&quot;, fill = &quot;Пол&quot;) +
   theme_minimal()</pre>
@@ -3308,7 +3347,12 @@ tx_injuries %&gt;% select(age, gender, injury_date) %&gt;%
   mutate(Day_of_year=injury_date-min(injury_date)) %&gt;%
   drop_na(Year, Day_of_year, gender) %&gt;%
   ggplot(data=.) +
+<<<<<<< Updated upstream
     geom_density_ridges(mapping = aes(x=Day_of_year, y=Year, fill=gender), alpha=.5) +
+=======
+    geom_density_ridges(mapping = aes(
+      x=Day_of_year, y=Year, fill=gender), alpha=.5) +
+>>>>>>> Stashed changes
     facet_wrap(&quot;gender&quot;, ncol=2)</pre>
 
 </article></slide><slide class=""><hgroup><h2>The code 6 - графици #5</h2></hgroup><article  id="the-code-6----5">
