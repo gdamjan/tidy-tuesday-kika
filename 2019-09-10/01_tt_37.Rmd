@@ -1,9 +1,19 @@
 ---
-title: "#TidyTuesday 2 / 10.9.2019: Week 37 Amusement Park Injuries"
+title: '#TidyTuesday 2 / 10.9.2019: Week 37 Amusement Park Injuries'
 author: "novica"
 date: "10/9/2019"
-output: ioslides_presentation
+output:
+  ioslides_presentation: default
+  slidy_presentation: default
 ---
+
+
+<style>
+    slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -36,7 +46,7 @@ The tidyverse is an “opinionated collection of R packages designed for data sc
 
 ## TidyTuesday 37 недела, 2 пат КИКА
 
-- Податоци: https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10
+- Податоци на [github](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10)
 - Добар пример за тоа ако на пример работите во осигурителна куќа и ви речат ајде да видиме што да се прави за полиси за осигурување за повреди во забавни паркови.
 
 ## TidyTuesday hints за новите податоци
@@ -56,9 +66,13 @@ library(tidyverse)
 Load the data from github (*NOTE: lines are broken for readibility*)
 
 ```{r, echo=TRUE, eval=FALSE}
-tx_injuries <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv")
+tx_injuries <- 
+readr::read_csv("https://raw.githubusercontent.com/rfordatascience/
+tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv")
 
-safer_parks <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
+safer_parks <- 
+readr::read_csv("https://raw.githubusercontent.com/rfordatascience/
+tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
 ```
 
 ## The code 3 - чистење на податоците #1 
@@ -113,7 +127,8 @@ possible_na <-
   unlist %>%
   unname()
 
-tx_injuries_na_fixed <- tx_injuries %>% mutate_all(.funs = fix_na, na_strings = possible_na)
+tx_injuries_na_fixed <- tx_injuries %>% 
+  mutate_all(.funs = fix_na, na_strings = possible_na)
 ```
 
 ## The code 3 - чистење на податоците #4
@@ -127,7 +142,8 @@ tx_injuries$injury_date
 
 tx_injuries <- tx_injuries %>% 
     mutate(injury_date = case_when(
-      str_length(injury_date) == 5 ~ as_date(as.numeric(injury_date), origin='1899-12-30'),
+      str_length(injury_date) == 5 ~ as_date(
+        as.numeric(injury_date), origin='1899-12-30'),
       str_detect(injury_date, "/") == TRUE ~ mdy(injury_date),
       TRUE ~ as.Date(NA)
       ))
@@ -169,7 +185,8 @@ Many `geoms`. They have a corresponding `stat` function that transforms the data
 
 ```{r, echo=TRUE, eval=FALSE}
 ggplot(data = drop_na(tx_injuries, gender)) + 
-  geom_histogram(mapping = aes(x = age, fill = gender), na.rm = TRUE, color="white") +
+  geom_histogram(mapping = aes(x = age, fill = gender), 
+                 na.rm = TRUE, color="white") +
   labs(x="Години", y="Број") +
   labs(title="Број на повреди по години по пол", fill = "Пол") +
   theme_minimal()
@@ -201,7 +218,8 @@ tx_injuries %>% select(age, gender, injury_date) %>%
   mutate(Day_of_year=injury_date-min(injury_date)) %>%
   drop_na(Year, Day_of_year, gender) %>%
   ggplot(data=.) +
-    geom_density_ridges(mapping = aes(x=Day_of_year, y=Year, fill=gender), alpha=.5) +
+    geom_density_ridges(mapping = aes(
+      x=Day_of_year, y=Year, fill=gender), alpha=.5) +
     facet_wrap("gender", ncol=2)
 ```
 
