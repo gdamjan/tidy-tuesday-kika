@@ -1,0 +1,25 @@
+name: CI
+
+# only build on push to master
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    # use a premade container with R tools, ubuntu 18:04 (ubuntu-latest)
+    # doesn't have r-cran packages and installing them from apt or from c-ran
+    # is too slow
+    container:
+      image: rocker/tidyverse:latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: compile all Rmd to htmls
+      run: make
+
+# TODO: publish on gh-pages
