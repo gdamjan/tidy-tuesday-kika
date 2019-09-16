@@ -28,6 +28,7 @@ ggplot(pv) +
   geom_line() +
   geom_area(alpha=.3)
 
+# lines and ridges
 
 library(ggridges)
 
@@ -41,9 +42,7 @@ pv2 <-
   filter(!year == "Total") %>% 
   select(year, unit_name, visitors) %>%
   group_by(year) %>% 
-  mutate(max_in_year = max(visitors)) %>% 
-  mutate(diff_from_max = max_in_year - visitors) %>%
-  mutate(year_rank=rank(diff_from_max))  %>% 
+  mutate(year_rank = rank(-visitors)) %>% 
   ungroup %>% 
   mutate(year = as.numeric(year)) %>% 
   arrange(year, year_rank)
@@ -60,22 +59,74 @@ ggplot(pv2_top20) +
 # alternative
 ord <- top20$unit_name[order(top20$visitors, decreasing = FALSE)]
 
-ggplot(pv2_top20) +
-  aes(x = year) +
-  aes(y = unit_name) +
-  aes(fill = unit_name) +
-  aes(group = unit_name) +
-  aes(height = visitors) +
-  aes(scale = .0000001) +
-  ggridges::geom_ridgeline(alpha=.3) +
-  theme_ridges() +
-  labs(y="") +
-  labs(x="") +
-  labs(title="National park visitors per year") +
-  labs(subtitle = "The twenty most-visited parks overall") +
-  theme(axis.text.y = element_text(size=10)) +
-  scale_y_discrete(limits = ord, labels = ord) +
-  scale_fill_cyclical(limits = ord, values = c("blue", "green")) +
-  scale_x_continuous(limits=c(1950, 2016), 
-                     breaks=seq(1950, 2016, 10), 
-                     labels=c("'50", "'60", "'70", "'80", "'90", "2000", "'10"))
+(
+  ridges <-
+    ggplot(pv2_top20) +
+    aes(x = year) +
+    aes(y = unit_name) +
+    aes(fill = unit_name) +
+    aes(group = unit_name) +
+    aes(height = visitors) +
+    aes(scale = .0000001) +
+    ggridges::geom_ridgeline(alpha = .3) +
+    theme_ridges() +
+    labs(y = "") +
+    labs(x = "") +
+    labs(title = "National park visitors per year") +
+    labs(subtitle = "The twenty most-visited parks overall") +
+    theme(axis.text.y = element_text(size = 10)) +
+    scale_y_discrete(limits = ord, labels = ord) +
+    scale_fill_cyclical(limits = ord, values = c("blue", "green")) +
+    scale_x_continuous(
+      limits = c(1950, 2016),
+      breaks = seq(1950, 2016, 10),
+      labels = c("'50", "'60", "'70", "'80", "'90", "2000", "'10")
+    )
+)
+
+# animate it? this is lame
+if (FALSE) {
+  library(gganimate)
+  
+  anim <- animate(ridges + transition_manual(frames = year, cumulative  = TRUE),
+                  duration = 15)
+  anim
+}
+
+# try something different
+# https://stackoverflow.com/questions/53162821/animated-sorted-bar-chart-with-bars-overtaking-each-other/53163549#53163549
+
+library(gganimate)
+ 
+for_anim <-
+  pv2_top20 %>%
+  group_by(year) %>%
+  mutate(year_rank = rank(-visitors)) %>%
+  mutate(value_rel = visitors / visitors[year_rank == 1]) %>%
+  mutate(value_lbl = paste0(" ", visitors)) %>%
+  group_by(unit_name) %>%
+  filter(year_rank <= 10)
+
+ggplot(for_anim, aes(-year_rank, value_rel, fill = unit_name)) +
+  geom_col(width = 0.8, position = "identity") +
+  coord_flip() +
+  geom_text(aes(
+    -year_rank,
+    y = 0,
+    label = unit_name,
+    hjust = 0
+  )) +
+  geom_text(aes(
+    -year_rank,
+    y = value_rel,
+    label = value_lbl,
+    hjust = 0
+  )) + # value label
+  theme_minimal() +
+  theme(legend.position = "none", axis.title = element_blank()) +
+  # animate along Year
+  transition_states(year, 4, 1) +
+  theme(axis.text = element_blank()) +
+  scale_fill_viridis_d(begin = .2)
+
+animate(pp, 200, fps = 2, duration = 40)
