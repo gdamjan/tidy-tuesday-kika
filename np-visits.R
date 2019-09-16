@@ -58,7 +58,7 @@ ggplot(pv2_top20) +
   geom_line()
 
 # alternative
-ord <- top20$unit_name[order(top20$visitors, decreasing = TRUE)]
+ord <- top20$unit_name[order(top20$visitors, decreasing = FALSE)]
 
 ggplot(pv2_top20) +
   aes(x = year) +
@@ -67,11 +67,15 @@ ggplot(pv2_top20) +
   aes(group = unit_name) +
   aes(height = visitors) +
   aes(scale = .0000001) +
-  ggridges::geom_ridgeline(alpha=.5) +
+  ggridges::geom_ridgeline(alpha=.3) +
   theme_ridges() +
-  labs(y="National park") +
-  labs(x="Year") +
-  labs(title="Park visitors per year") +
+  labs(y="") +
+  labs(x="") +
+  labs(title="National park visitors per year") +
+  labs(subtitle = "The twenty most-visited parks overall") +
   theme(axis.text.y = element_text(size=10)) +
   scale_y_discrete(limits = ord, labels = ord) +
-  scale_fill_cyclical(limits = ord, values = c("blue", "green"))
+  scale_fill_cyclical(limits = ord, values = c("blue", "green")) +
+  scale_x_continuous(limits=c(1950, 2016), 
+                     breaks=seq(1950, 2016, 10), 
+                     labels=c("'50", "'60", "'70", "'80", "'90", "2000", "'10"))
