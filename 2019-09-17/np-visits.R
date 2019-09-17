@@ -75,7 +75,8 @@ ggplot(pv2_top20) +
 
 # alternative
 ord <- top20$unit_name[order(top20$visitors, decreasing = FALSE)]
-
+lbl <- str_remove(ord, "National Park")
+  
 (
   ridges <-
     ggplot(pv2_top20) +
@@ -91,8 +92,8 @@ ord <- top20$unit_name[order(top20$visitors, decreasing = FALSE)]
     labs(x = "") +
     labs(title = "National park visitors per year") +
     labs(subtitle = "The twenty most-visited parks overall") +
-    theme(axis.text.y = element_text(size = 10)) +
-    scale_y_discrete(limits = ord, labels = ord) +
+    # theme(axis.text.y = element_text(size = 14)) +
+    scale_y_discrete(limits = ord, labels = lbl) +
     scale_fill_cyclical(limits = ord, values = c("dodgerblue", "forestgreen")) +
     scale_x_continuous(
       limits = c(1950, 2016),
