@@ -31,14 +31,12 @@ pre {
   height: 50vh !important;
 }
 
-.midcenter {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-}
 </style>
 
-
+```{r, include=F}
+knitr::opts_chunk$set(fig.width = 9, message = F, warning = F,
+                      comment = "", cache = F, fig.height = 5)
+```
 
 
 #TidyTuesday 38: податоци од националните паркови во САД
@@ -73,14 +71,18 @@ Pipes expained, maybe
 
 Бавен ggplot
 ========================================================
+class: small-code
 
 Вообичаено:
 
 ```{r, eval = F}
-ggplot(my_data, aes(var1, y = var2, col = var3)) +
+ggplot(my_data,
+ aes(var1, y = var2, col = var3)) +
   geom_point() +
   ggtitle("My Title") +
-  labs(x = "the x label", y = "the y label", col = "legend title")
+  labs(x = "the x label",
+   y = "the y label",
+   col = "legend title")
 ```
 
 (извор:[EvaMaeRey](https://github.com/EvaMaeRey/little_flipbooks_library/tree/master/minimal_example))
@@ -103,6 +105,7 @@ ggplot(data = my_data) +
 
 Ѕирни ги податоците со glimpse
 ========================================================
+class: small-code
 
 ```{r, echo = F}
 library(tidyverse)
@@ -116,6 +119,7 @@ glimpse(park_visits)
 Години и посетители #1
 ========================================================
 class: small-code
+
 ```{r group_the_data_1, echo = T, eval = F}
 pv_grouped <- park_visits %>%
   filter(unit_type == "National Park") %>%
@@ -164,7 +168,7 @@ class: small-code
 
 График за години и посетители #2
 ========================================================
-class: midcenter
+
 ```{r national_parks_visitors_2, echo=F, eval=T}
  ggplot(data = pv_grouped) +
     aes(x = year) +
@@ -268,7 +272,6 @@ lbl <- str_remove(ord, "National Park")
 
 График за најдобрите 20 паркови #2
 ========================================================
-class: midcenter
 
 ```{r best_parks_2, echo=F, eval=T}
 library(ggridges)
