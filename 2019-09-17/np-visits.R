@@ -19,7 +19,7 @@ park_visits <-
 
 pv <- 
   park_visits %>%
-  filter(unit_type == "National Park") +
+  filter(unit_type == "National Park") %>% 
   filter(!year == Total)
   group_by(year) %>% 
   summarise_at(.vars = vars("visitors"), .funs = list("visitors_per_year"=sum)) %>% 
@@ -48,12 +48,14 @@ pv <-
 library(ggridges)
 
 top20 <- park_visits %>% 
+  filter(unit_type == "National Park") %>% 
   filter(year == "Total") %>% 
   arrange(desc(visitors)) %>% 
   top_n(n = 20, wt=visitors) 
 
 pv2 <- 
   park_visits %>% 
+  filter(unit_type == "National Park") %>% 
   filter(!year == "Total") %>% 
   select(year, unit_name, visitors) %>%
   group_by(year) %>% 
@@ -82,8 +84,8 @@ ord <- top20$unit_name[order(top20$visitors, decreasing = FALSE)]
     aes(fill = unit_name) +
     aes(group = unit_name) +
     aes(height = visitors) +
-    aes(scale = .0000001) +
-    ggridges::geom_ridgeline(alpha = .3) +
+    aes(scale = .0000003) +
+    ggridges::geom_ridgeline(alpha = .5) +
     theme_ridges() +
     labs(y = "") +
     labs(x = "") +
@@ -91,12 +93,13 @@ ord <- top20$unit_name[order(top20$visitors, decreasing = FALSE)]
     labs(subtitle = "The twenty most-visited parks overall") +
     theme(axis.text.y = element_text(size = 10)) +
     scale_y_discrete(limits = ord, labels = ord) +
-    scale_fill_cyclical(limits = ord, values = c("blue", "green")) +
+    scale_fill_cyclical(limits = ord, values = c("dodgerblue", "forestgreen")) +
     scale_x_continuous(
       limits = c(1950, 2016),
       breaks = seq(1950, 2016, 10),
       labels = c("1950", "'60", "'70", "'80", "'90", "2000", "'10")
-    )
+    ) +
+    ggthemes::theme_fivethirtyeight()
 )
 
 # animate it? this is lame
