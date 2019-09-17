@@ -1,0 +1,180 @@
+---
+title: "#TidyTuesday 38: податоци од националните паркови во САД"
+author: "novica, со урнек слајдови од [Gina Reynolds](https://github.com/EvaMaeRey)"
+date: "17/09/2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["kunoichi", "ninjutsu"]
+    nature:
+      ratio: "16:9"
+      beforeInit: "https://platform.twitter.com/widgets.js"
+      highlightLines: true
+---
+
+
+```{r, message = F, warning = F, include = F}
+source("https://raw.githubusercontent.com/EvaMaeRey/little_flipbooks_library/master/xaringan_reveal_parentheses_balanced.R")
+```
+
+```{r, include=F}
+knitr::opts_chunk$set(fig.width = 9, message = F, warning = F,
+                      comment = "", cache = F, fig.height = 5)
+```
+
+---
+
+# Резиме
+
+- .Rmd (R Markdown) е околината во која ќе работиме;
+- Нов R Notebook: Мени: File -> New File -> R notebook
+- Корисни кратенки:
+  - code chunks (ctrl+alt+i)
+  - pipes %>% (ctrl+shift+m)
+  - assignment ( <- )
+  - view()
+
+---
+
+# Pipes expained, maybe
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">This is how I explain the &#39;pipe&#39; to <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> newbies... <a href="https://t.co/VdAFTLzijy">pic.twitter.com/VdAFTLzijy</a></p>&mdash; We are R-Ladies (@WeAreRLadies) <a href="https://twitter.com/WeAreRLadies/status/1172576445794803713?ref_src=twsrc%5Etfw">September 13, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+---
+
+# Нов dataset
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">The <a href="https://twitter.com/R4DScommunity?ref_src=twsrc%5Etfw">@R4DScommunity</a> welcomes you to week 38 of <a href="https://twitter.com/hashtag/TidyTuesday?src=hash&amp;ref_src=twsrc%5Etfw">#TidyTuesday</a>! We&#39;re exploring National Park Visits!!<br><br>📁 <a href="https://t.co/sElb4fcv3u">https://t.co/sElb4fcv3u</a><br>🗞 <a href="https://t.co/uKMrTmKokT">https://t.co/uKMrTmKokT</a><a href="https://twitter.com/hashtag/r4ds?src=hash&amp;ref_src=twsrc%5Etfw">#r4ds</a> <a href="https://twitter.com/hashtag/tidyverse?src=hash&amp;ref_src=twsrc%5Etfw">#tidyverse</a> <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> <a href="https://twitter.com/hashtag/dataviz?src=hash&amp;ref_src=twsrc%5Etfw">#dataviz</a> <a href="https://t.co/92S7a7mzuj">pic.twitter.com/92S7a7mzuj</a></p>&mdash; Thomas Mock 👨🏼
+💻 (@thomas_mock) <a href="https://twitter.com/thomas_mock/status/1173586589462740994?ref_src=twsrc%5Etfw">September 16, 2019</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+---
+
+#Бавен ggplot
+
+Вообичаено:
+
+```{r, eval = F}
+ggplot(my_data, aes(var1, y = var2, col = var3)) +
+  geom_point() +
+  ggtitle("My Title") +
+  labs(x = "the x label", y = "the y label", col = "legend title")
+```
+
+Бавно:
+
+```{r, eval = F}
+ggplot(data = my_data) +
+  aes(x = var1) +
+  labs(x = "the x label") +
+  aes(y = var2) +
+  labs(y = "the y label") +
+  geom_point() +
+  aes(col = var3) +
+  labs(col = "legend title") +
+  labs(title = "My title")
+```
+
+(извор: https://github.com/EvaMaeRey/little_flipbooks_library/tree/master/minimal_example)
+---
+
+
+#Ѕирни ги податоците со glimpse
+
+
+```{r, echo = F}
+library(tidyverse)
+library(dplyr)
+
+park_visits <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/national_parks.csv")
+
+glimpse(park_visits)
+```
+
+---
+
+---
+#Години и посетители
+
+```{r group_the_data, echo = F}
+ pv_grouped <- park_visits %>%
+  filter(!year == "Total") %>%
+  group_by(year) %>%
+  summarise_at(.vars = vars("visitors"),
+    .funs = list("visitors_per_year"=sum)) %>%
+  mutate(year = as.numeric(year))
+pv_grouped
+```
+
+---
+
+`r apply_reveal("group_the_data")`
+
+---
+
+```{r national_parks_visitors, echo=F, eval=F}
+library(scales)
+
+ggplot(data = pv_grouped) +
+  aes(x = year) +
+  labs(x = "Година") +
+  scale_x_continuous(breaks = seq(1900, 2016, by = 10)) +
+  aes(y = visitors_per_year) +
+  labs(y = "Број на посетители") +
+  scale_y_continuous(labels = number_format(scale = 0.000001, suffix = "М")) +
+  geom_line() +
+  geom_area(alpha=.3, fill="dark green") +
+  labs(title = "Популарноста на парковите во постојан пораст",
+    subtitle = "Годишни посети на парковите од 1904") +
+  theme_minimal()
+```
+
+`r apply_reveal("national_parks_visitors")`
+
+---
+
+```{r, echo = F}
+library(ggridges)
+```
+---
+
+#Топ 20
+
+```{r top20_data, echo = F}
+top20 <- park_visits %>%
+  filter(year == "Total") %>%
+  arrange(desc(visitors)) %>%
+  top_n(n = 20, wt=visitors)
+
+park_visits_20 <-
+  park_visits %>%
+  filter(!year == "Total") %>%
+  select(year, unit_name, visitors) %>%
+  group_by(year) %>%
+  mutate(year_rank = rank(-visitors)) %>%
+  ungroup %>%
+  mutate(year = as.numeric(year)) %>%
+  arrange(year, year_rank)
+
+pv20_top20 <- filter(.data = park_visits_20,
+  unit_name %in% top20$unit_name)
+```
+
+---
+
+`r apply_reveal("top20_data")`
+
+---
+
+```{r top20_parks, echo=F, eval=F}
+ggplot(data = pv20_top20) +
+  aes(x = year) +
+  labs(x = "some text") +
+  aes(y = -year_rank) +
+  labs(y = "some text") +
+  aes(group = unit_name, color=unit_name) +
+  geom_line() +
+  theme_minimal()
+
+`r apply_reveal("top20_parks")`
+```
