@@ -1,32 +1,47 @@
 library(tidyverse)
+# install.packages("ggthemes")
+library(ggthemes)
 
 park_visits <-
   readr::read_csv(
     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/national_parks.csv"
   )
-state_pop <-
-  readr::read_csv(
-    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/state_pop.csv"
-  )
-gas_price <-
-  readr::read_csv(
-    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/gas_price.csv"
-  )
+
+# state_pop <-
+#   readr::read_csv(
+#     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/state_pop.csv"
+#   )
+# gas_price <-
+#   readr::read_csv(
+#     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/gas_price.csv"
+#   )
 
 
 pv <- 
   park_visits %>%
+  filter(unit_type == "National Park") +
+  filter(!year == Total)
   group_by(year) %>% 
   summarise_at(.vars = vars("visitors"), .funs = list("visitors_per_year"=sum)) %>% 
   mutate(year = as.numeric(year)) %>% 
   drop_na(year)
 
-ggplot(pv) + 
-  aes(x=year) + 
-  aes(y=visitors_per_year) +
-  scale_x_continuous()+
-  geom_line() +
-  geom_area(alpha=.3)
+  ggplot(pv) +
+    aes(x = year) +
+    aes(y = visitors_per_year / 10^6) +
+    geom_line(color = "forestgreen") +
+    geom_area(alpha = .3, fill = "forestgreen") +
+    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(labels = scales::unit_format(unit = "M")) +
+    scale_x_continuous(breaks = seq(1910, 2016, 10),
+                       labels = c(1910, paste("'", seq(20, 90, 10), sep = ""), 2000, "'10")) +
+    labs(x="") +
+    labs(y="") +
+    labs(title="U.S. national parks have never been so popular") +
+    labs(subtitle="Annial recreational visits to national parks since 1904") +
+    labs(caption="Source: National Parks Service") +
+    ggthemes::theme_fivethirtyeight()
+    
 
 # lines and ridges
 
