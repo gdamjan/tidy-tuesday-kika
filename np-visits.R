@@ -80,7 +80,7 @@ ord <- top20$unit_name[order(top20$visitors, decreasing = FALSE)]
     scale_x_continuous(
       limits = c(1950, 2016),
       breaks = seq(1950, 2016, 10),
-      labels = c("'50", "'60", "'70", "'80", "'90", "2000", "'10")
+      labels = c("1950", "'60", "'70", "'80", "'90", "2000", "'10")
     )
 )
 
