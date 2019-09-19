@@ -1,5 +1,5 @@
 ---
-title: "reticulate attempt 1"
+title: "TidyTuesday Week 38 in Python"
 output: html_notebook
 ---
 
@@ -13,6 +13,7 @@ library(reticulate)
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import seaborn as sns
 ```
 
@@ -26,6 +27,8 @@ park_visits_py.head()
 
 park_visits_py.dtypes
 
+# Note: Automatic exclusion of “nuisance” columns happens when 'groupby'.
+# In this case “nuisance” columns are those that are not 'sum'-ed.
 pv_grouped = park_visits_py[park_visits_py['unit_type'] == 'National Park']
 pv_grouped = pv_grouped[pv_grouped['year'] != 'Total']
 pv_grouped = pv_grouped.groupby('year')['visitors'].sum().reset_index()
@@ -37,20 +40,45 @@ pv_grouped.dtypes
 ```
 
 ```{python}
+#Matplotlib pandas plotting
 plt.style.use('fivethirtyeight')
 pv_grouped.plot(x='year', y='visitors', kind='area', color = 'darkgreen', alpha=0.3)
 ```
 
 ```{python}
+#Matplotlib obejt-oriented, because: https://pbpython.com/effective-matplotlib.html
+
+#Function for number format on axis
+def numbers(x, pos):
+    'The two args are the value and tick position'
+    if x >= 1000000:
+        return '{:1.0f}M'.format(x*1e-6)
+    return '{:1.0f}K'.format(x*1e-3)
+
+
 plt.style.use('fivethirtyeight')
-pv_grouped.plot(x='year', y='visitors', kind='area', color = 'darkgreen', alpha=0.3)
+
+fig, ax = plt.subplots()
+pv_grouped.plot(x='year', y='visitors', kind='area', color = 'darkgreen', alpha=0.3, ax=ax)
+ax.set_xlabel('')
+ax.set_ylabel('')
+ax.set_title('U.S. national parks have never been so popular')
+formatter = FuncFormatter(numbers)
+ax.yaxis.set_major_formatter(formatter)
+ax.legend().set_visible(False)
+
+plt.show()
 ```
 
-```{python}
 
-```
+
+
+
 
 ```{python}
+#Seaborn plot
 sns.set()
-sns.relplot(data=pv_grouped, x='year', y='visitors', kind='line');
+sns.relplot(data=pv_grouped, x='year', y='visitors', kind='line')
+#this, at least in Rstudio, needs a 'plt.show()'
+plt.show()
 ```
