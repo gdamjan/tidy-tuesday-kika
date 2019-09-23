@@ -199,7 +199,7 @@ ggplot(data = drop_na(sd_grouped)) +
   aes(y = school_year) +
   labs(y = "Години") +
   aes(size = total_per_locale) +
-  labs(size = "Број на ученици (во сто илјади)") +
+  labs(size = "total_per_locale") +
   aes(group = locale, color = locale) +
   scale_colour_viridis_d(option = "plasma") +
   geom_point(alpha = 0.25) +
