@@ -1,6 +1,6 @@
 ---
-title: "A Minimal #TidyTuesday Flipbook"
-author: "Gina Reynolds, May 2019"
+title: "#TidyTuesday week 39, училиштата во САД"
+author: "novica со темплејт на [Gina Reynolds](https://github.com/EvaMaeRey)"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -31,7 +31,7 @@ source(file = "https://raw.githubusercontent.com/EvaMaeRey/little_flipbooks_libr
 
 # Резиме
 
-
+- Презентацијата е розева дека користам урнек од RLadies;
 - .Rmd (R Markdown) е околината во која ќе работиме;
 - Нов R Notebook: Мени: File -> New File -> R notebook
 - Корисни кратенки:
