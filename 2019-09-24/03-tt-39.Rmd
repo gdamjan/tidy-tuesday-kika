@@ -1,0 +1,237 @@
+---
+title: "A Minimal #TidyTuesday Flipbook"
+author: "Gina Reynolds, May 2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["kunoichi", "ninjutsu"]
+    nature:
+      ratio: 16:10
+      highlightStyle: github
+      highlightLines: true
+      beforeInit: "https://platform.twitter.com/widgets.js"
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include=F}
+knitr::opts_chunk$set(fig.width = 6, message = F, warning = F, 
+                      comment = "", cache = F)
+```
+
+```{r, echo=FALSE}
+source(file = "https://raw.githubusercontent.com/EvaMaeRey/little_flipbooks_library/master/xaringan_reveal_parentheses_balanced.R")
+```
+
+---
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">I couldn&#39;t resist getting in on the fun <a href="https://t.co/tt5AUZArD5">pic.twitter.com/tt5AUZArD5</a></p>&mdash; Jacqueline Nolis (@skyetetra) <a href="https://twitter.com/skyetetra/status/1160012260456062977?ref_src=twsrc%5Etfw">August 10, 2019</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+---
+
+# Резиме
+
+
+- .Rmd (R Markdown) е околината во која ќе работиме;
+- Нов R Notebook: Мени: File -> New File -> R notebook
+- Корисни кратенки:
+  - code chunks (ctrl+alt+i)
+  - pipes %>% (ctrl+shift+m)
+  - assignment ( <- )
+  - view()
+
+---
+
+# Повторување: што е бавен ggplot?
+
+
+„Бавен ggplot“ значи постепено пишување, наместо спојување на цели елементи заедно, како следи:
+
+- функцијата **aes()** е извадена од функцијата **ggplot()**;
+- се користат помалку функции: на пр. **labs()** за наслов наместо **ggtitle()**;
+- користење на функција повеќе пати, на пример: **aes(x = var1) + aes(y = var2)** наместо **aes(x = var1, y = var2)**;
+- употреба на функции од **base R** и **tidyverse**. Сѐ друго се повикува со :: 
+- сите аргументи се пишуваат експлицитно: **aes(x = gdppercap)**, а не **aes(gdppercap)**
+- наредбите во **ggplot** се подредени така што реактивноста е очигледна; исто така прилагудувањата на **scale** се блиску до **aes**
+
+---
+
+Споредба на „обичен“ и „бавен“ ggplot
+
+Вообичаено:
+
+```{r, eval = F}
+ggplot(my_data, aes(var1, y = var2, col = var3)) +
+  geom_point() +
+  ggtitle("My Title") +
+  labs(x = "the x label", y = "the y label", col = "legend title")
+```
+
+Бавно: 
+
+```{r, eval = F}
+ggplot(data = my_data) +
+  aes(x = var1) +
+  labs(x = "the x label") +
+  aes(y = var2) +
+  labs(y = "the y label") +
+  geom_point() +
+  aes(col = var3) +
+  labs(col = "legend title") +
+  labs(title = "My title")
+```
+
+---
+
+# Почнувате
+
+Вчитајте го tidyverse.
+
+```{r}
+library(tidyverse)
+```
+
+И вчитајте ги податоците од github страницата на tidytuesday.
+
+```{r}
+school_diversity <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-24/school_diversity.csv") 
+```
+
+---
+
+# Ѕирнете ги податоците
+
+```{r}
+glimpse(school_diversity)
+```
+
+---
+
+# Имињата на колоните со мали букви
+
+```{r}
+names(school_diversity) <- c("LEAID", "LEA_NAME", "state", "locale", "school_year", "aian", "asian", "black", "hispanic", "white", "multi", "total", "diverse", "variance", "int_group")
+```
+
+---
+
+# Две визуелизации, идеи?
+
+![buble chart](03-tt-39_files/Screenshot_20190923_182920.png)
+
+Секој круг да биде вредноста од **Total**. Но тоа можеби се премногу податоци за на еден графикон (27.944). Можеби подобро групирање по тип (урбано/рурално/итн.) и посебни графикони (facet) да бидат регионите од САД. Но, нив ги нема во податоците.
+
+---
+
+# Идеи, продолжено (за направи сам :-))
+
+![bar chart](03-tt-39_files/Screenshot_20190923_185113.png)
+
+По сличен начин на размислување, групирај ги податоците по држава и подели ги (facet) по региони, така што за секоја држава ќе има по еден **bar** што ќе покажува ентичка распределба на учениците.
+
+---
+
+# Региони во САД? 
+
+```{r regions}
+NE.abrv <- c("CT","ME","MA","NH","RI","VT","NJ","NY","PA")
+
+MW.abrv <- c("IN","IL","MI","OH","WI","IA","KS","MN","MO","NE",
+             "ND","SD")
+
+S.abrv <- c("DE","DC","FL","GA","MD","NC","SC","VA","WV","AL",
+            "KY","MS","TN","AR","LA","OK","TX")
+
+W.abrv <- c("AZ","CO","ID","NM","MT","UT","NV","WY","AK","CA",
+            "HI","OR","WA")
+
+region.list <- list(
+  Northeast=NE.abrv,
+  Midwest=MW.abrv,
+  South=S.abrv,
+  West=W.abrv)
+```
+
+Не ги знаев регионите, ги ископирав од [интернет](https://stackoverflow.com/questions/46066974/add-column-to-label-u-s-states-by-their-u-s-census-region).
+
+---
+
+# Да ги додадеме
+
+## Еден начин
+```{r mutate with case when}
+school_diversity <- school_diversity %>% 
+  mutate(region = case_when( 
+    is.element(state, NE.abrv) ~ "Northeast",
+    is.element(state, MW.abrv) ~ "Midwest",
+    is.element(state, S.abrv) ~ "South",
+    is.element(state, W.abrv) ~ "West",
+    TRUE ~ as.character(state)
+  ))
+```
+
+# Втор начин
+
+```{r mutate with map, eval=F}
+school_diversity <- school_diversity %>%
+  mutate(mapregion = map(state, names(region.list)[grep(state, region.list)])) #ова 1. не работи 2. е баш нечитко може ли подобро?
+```
+
+---
+
+# Групирање
+
+```{r group the data}
+sd_grouped <- school_diversity %>% 
+  group_by(region, school_year, locale) %>%
+  summarise_at(vars("total"),
+    list("total_per_locale"=sum))
+```
+
+---
+
+# Bubble (slow gg) plot
+
+```{r bubble plot, fig.height=10, echo = F, eval = T}
+ggplot(data = drop_na(sd_grouped)) +
+  aes(x = total_per_locale / 10^5) + 
+  labs(x = "Број на ученици (во сто илјади) ") +
+  aes(y = school_year) +
+  labs(y = "Години") +
+  aes(size = total_per_locale) +
+  labs(size = "Број на ученици (во сто илјади)") +
+  aes(group = locale, color = locale) +
+  scale_colour_viridis_d(option = "plasma") +
+  geom_point(alpha = 0.25) +
+  geom_jitter(size = 2.5, alpha = 0.25, width = 1) +
+  facet_grid(rows = vars(region)) +
+  ggthemes::theme_fivethirtyeight() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  theme(panel.spacing.y = unit(0.5, 'cm')) +
+  guides(size=FALSE) 
+```
+
+---
+
+`r apply_reveal("bubble plot")`
+
+---
+
+# Зошто bubble plot беше лоша идеја
+
+1. Не видов дека **SCHOOL_YEAR** се само две години, мислев дека е секоја учебна од 1994 до 2017.
+
+2. Дискусија?
+---
+
+# Направи сам
+
+![bar chart](03-tt-39_files/Screenshot_20190923_185113.png)
+
+---
+
+```{css, eval = TRUE, echo = F}
+.remark-code{line-height: 1.5; font-size: 80%}
+```
+
+
