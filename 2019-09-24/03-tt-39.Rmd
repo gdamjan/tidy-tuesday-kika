@@ -289,7 +289,8 @@ reorganized <-
 ---
 # Графикон по држави
 
-```{r geofacet plot, echo = F, eval = T}
+```{r geofacet plot, echo = F, eval = T, fig.width=10}
+library(geofacet)
 ggplot(data = reorganized) + 
   labs(title="School diversity in the US in 1994-1995") +
   aes(x=diverse) +
@@ -302,7 +303,7 @@ ggplot(data = reorganized) +
   scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +
   scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +
   coord_flip() +
-  geofacet::facet_geo(~state, grid = "us_state_grid1") +
+  facet_geo(~state, grid = "us_state_grid1") +
   theme_minimal()+
   theme(
     strip.text = element_text(
