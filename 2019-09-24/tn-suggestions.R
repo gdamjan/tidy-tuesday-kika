@@ -118,14 +118,21 @@ library(geofacet)
 reorganized <-
   school_diversity %>%
   group_by(ST, SCHOOL_YEAR, diverse) %>%
+  # add a column counting number of rows per group
+  # will reduce the dataset to the number of groups
   tally() %>%
+  # select only needed columns
   select(state = ST, school_year = SCHOOL_YEAR, diverse, n) %>%
+  # order the diverse variable so that we plot in meaningul order (bad-> better -> good)
   mutate(diverse = factor(
     diverse,
     levels = c("Extremely undiverse", "Undiverse", "Diverse")
   )) %>%
+  # regroup to calculate percent of each category of `diverse`
+  # per state and per year
   group_by(state, school_year) %>%
   mutate(percent = n / sum(n)) %>%
+  # filter to get just one of the school years
   filter(school_year == "1994-1995")
 
 ggplot(data = reorganized) + 
