@@ -53,6 +53,28 @@ school_diversity_w_regions <- dplyr::left_join(x = school_diversity, y = region_
   # more: https://db.rstudio.com/dplyr/
 
 
+##### use map. 
+
+# first we need a function to "map" over the values of `state`
+get_region <- function(state) {
+  # check if state is an element of any of the vectors in the list
+  # return TRUE/FALSE for easy indexing
+  # map_lgl conviniently returns a logical vector
+  ind <- map_lgl(region.list, function(x) state %in% x)
+  # get the name of the element that returned TRUE
+  # return the same as it is the last statement without assignment to variable
+  region.list[ind] %>% names
+}
+
+# felt noticeably slower than join
+school_diversity %>% select(ST) %>%
+  # we use the `_chr` variant of map 
+  # that returns a character vector, 
+  # otherwise output is a list, and 
+  # its messy to put a list inside a cell of a data frame
+  mutate(region=map_chr(ST, get_region))
+
+
 ##### Make a cartogram
 
 # adapted from https://serialmentor.com/dataviz/geospatial-data.html#cartograms
