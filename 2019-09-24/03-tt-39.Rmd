@@ -53,7 +53,7 @@ source(file = "https://raw.githubusercontent.com/EvaMaeRey/little_flipbooks_libr
 
 ---
 
-Споредба на „обичен“ и „бавен“ ggplot
+#Споредба на „обичен“ и „бавен“ ggplot
 
 Вообичаено:
 
