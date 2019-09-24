@@ -23,19 +23,6 @@ knitr::opts_chunk$set(fig.width = 6, message = F, warning = F,
 source(file = "https://raw.githubusercontent.com/EvaMaeRey/little_flipbooks_library/master/xaringan_reveal_parentheses_balanced.R")
 ```
 
----
-
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">I couldn&#39;t resist getting in on the fun <a href="https://t.co/tt5AUZArD5">pic.twitter.com/tt5AUZArD5</a></p>&mdash; Jacqueline Nolis (@skyetetra) <a href="https://twitter.com/skyetetra/status/1160012260456062977?ref_src=twsrc%5Etfw">August 10, 2019</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-Пробајте:
-
-```{r, eval=F }
-n = c(2, 3, 5) 
-s = c("aa", "bb", "cc") 
-b = c(TRUE, FALSE, TRUE) 
-df = data.frame(n, s, b)  
-```
-
 
 ---
 
@@ -122,7 +109,7 @@ glimpse(school_diversity)
 Ова е трансформација заради олеснување. Сакаме кога ќе правиме други трансформации да не грешиме во **Total** или **d_Locale** како што се оригиналните имиња на колоните.
 
 ```{r}
-names(school_diversity) <- c("LEAID", "LEA_NAME", "state", "locale", "school_year", "aian", "asian", "black", "hispanic", "white", "multi", "total", "diverse", "variance", "int_group")
+names(school_diversity) <- c("leaid", "lea_name", "state", "locale", "school_year", "aian", "asian", "black", "hispanic", "white", "multi", "total", "diverse", "variance", "int_group")
 ```
 
 ---
