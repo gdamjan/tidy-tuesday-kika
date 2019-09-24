@@ -74,6 +74,39 @@ school_diversity %>% select(ST) %>%
   # its messy to put a list inside a cell of a data frame
   mutate(region=map_chr(ST, get_region))
 
+# IN ONE LINE :-o
+
+# install.packages("microbenchmark")
+library(microbenchmark)
+
+## %in%
+microbenchmark(times=10,
+  school_diversity$ONE_LINE_REGION_OTRA_VEZ <-
+    map_chr(school_diversity$ST, function(x)
+      names(region.list[map_lgl(region.list, function(y)
+        x %in% y)]))
+)
+
+## GREP
+microbenchmark(times=10,
+  school_diversity$ONE_LINE_REGION <-
+    map_chr(school_diversity$ST, function(x)
+      names(region.list)[grep(x, region.list)])
+)
+
+## JOIN
+
+microbenchmark(times=10,
+  school_diversity_w_regions <-
+    dplyr::left_join(
+      x = school_diversity,
+      y = region_df,
+      by = c("ST" = "state")
+    )
+)
+
+
+
 
 ##### Make a cartogram
 
