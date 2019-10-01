@@ -303,7 +303,7 @@ ggplot(data = reorganized) +
   scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +
   scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +
   coord_flip() +
-  geofacet::facet_geo(~state, grid = "us_state_grid1") +
+  facet_geo(~state, grid = "us_state_grid1") +
   theme_minimal()+
   theme(
     strip.text = element_text(
