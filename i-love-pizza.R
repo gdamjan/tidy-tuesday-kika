@@ -2,18 +2,18 @@
 
 library(tidyverse)
 
-pizza_jared <-
-  readr::read_csv(
-    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_jared.csv"
-  )
+#pizza_jared <-
+#  readr::read_csv(
+#    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_jared.csv"
+#  )
 pizza_barstool <-
   readr::read_csv(
     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_barstool.csv"
   )
-pizza_datafiniti <-
-  readr::read_csv(
-    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_datafiniti.csv"
-  )
+#pizza_datafiniti <-
+#  readr::read_csv(
+#    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_datafiniti.csv"
+#  )
 
 
 # compare how pizzerias are rated by community vs. critics
@@ -55,7 +55,7 @@ community_vs_dave + geom_smooth(method = "lm")
 no_zeros <- community_vs_dave %+% filter(pzbs, review_stats_community_average_score > 0)
 
 # now the 1:1 line and the linear regression are much closer!
-no_zeros + geom_abline(slope = 1, intercept = 0) + geom_smooth(method="lm")
+no_zeros + geom_abline(slope = 1, intercept = 0) + geom_smooth(method="lm", stat = ) 
 
 # annotatations are better than legends
 (
@@ -140,3 +140,5 @@ annot <-
                          draw.llim = TRUE
                        )
   )
+library(ggpubr)
+annot + stat_cor(method = "pearson")
