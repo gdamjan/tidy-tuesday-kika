@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>#TidyTuesday week 39, училиштата во САД</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="novica со темплејт на Gina Reynolds" />
+    <link href="libs/remark-css-0.0.1/kunoichi.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/ninjutsu.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# #TidyTuesday week 39, училиштата во САД
+### novica со темплејт на <a href="https://github.com/EvaMaeRey">Gina Reynolds</a>
+
+---
+
+
+
+
+
+
+
+
+---
+
+# Резиме
+
+- Презентацијата е розева дека користам урнек од RLadies;
+- .Rmd (R Markdown) е околината во која ќе работиме;
+- Нов R Notebook: Мени: File -&gt; New File -&gt; R notebook
+- Корисни кратенки:
+  - code chunks (ctrl+alt+i)
+  - pipes %&gt;% (ctrl+shift+m)
+  - assignment ( &lt;- )
+  - view()
+- за едниот од графиконите ќе ви треба install.packages("geofacet")
+---
+
+# Повторување: што е бавен ggplot?
+
+
+„Бавен ggplot“ значи постепено пишување, наместо спојување на цели елементи заедно, како следи:
+
+- функцијата **aes()** е извадена од функцијата **ggplot()**;
+- се користат помалку функции: на пр. **labs()** за наслов наместо **ggtitle()**;
+- користење на функција повеќе пати, на пример: **aes(x = var1) + aes(y = var2)** наместо **aes(x = var1, y = var2)**;
+- употреба на функции од **base R** и **tidyverse**. Сѐ друго се повикува со :: 
+- сите аргументи се пишуваат експлицитно: **aes(x = gdppercap)**, а не **aes(gdppercap)**
+- наредбите во **ggplot** се подредени така што реактивноста е очигледна; исто така прилагудувањата на **scale** се блиску до **aes**
+
+---
+
+#Споредба на „обичен“ и „бавен“ ggplot
+
+Вообичаено:
+
+
+```r
+ggplot(my_data, aes(var1, y = var2, col = var3)) +
+  geom_point() +
+  ggtitle("My Title") +
+  labs(x = "the x label", y = "the y label", col = "legend title")
+```
+
+Бавно: 
+
+
+```r
+ggplot(data = my_data) +
+  aes(x = var1) +
+  labs(x = "the x label") +
+  aes(y = var2) +
+  labs(y = "the y label") +
+  geom_point() +
+  aes(col = var3) +
+  labs(col = "legend title") +
+  labs(title = "My title")
+```
+
+---
+
+# Почнувате
+
+Вчитајте го tidyverse.
+
+
+```r
+library(tidyverse)
+```
+
+И вчитајте ги податоците од github страницата на tidytuesday.
+
+
+```r
+school_diversity &lt;- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-24/school_diversity.csv") 
+```
+
+---
+
+# Ѕирнете ги податоците
+
+
+```r
+glimpse(school_diversity)
+```
+
+```
+Observations: 27,944
+Variables: 15
+$ LEAID        &lt;chr&gt; "0100002", "0100005", "0100005", "0100006", "010000…
+$ LEA_NAME     &lt;chr&gt; "alabama youth services", "albertville city", "albe…
+$ ST           &lt;chr&gt; "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL…
+$ d_Locale_Txt &lt;chr&gt; NA, "town-distant", "town-distant", "rural-distant"…
+$ SCHOOL_YEAR  &lt;chr&gt; "1994-1995", "1994-1995", "2016-2017", "1994-1995",…
+$ AIAN         &lt;dbl&gt; 0.00000000, 0.00000000, 0.29373967, 0.10436857, 0.4…
+$ Asian        &lt;dbl&gt; 0.5893910, 0.3207184, 0.5507619, 0.1341882, 0.29892…
+$ Black        &lt;dbl&gt; 71.7092338, 1.2828736, 3.1944189, 0.3727449, 1.0726…
+$ Hispanic     &lt;dbl&gt; 0.19646365, 4.52212957, 46.74132550, 0.90949754, 21…
+$ White        &lt;dbl&gt; 27.504912, 93.874278, 46.778043, 98.479201, 75.8044…
+$ Multi        &lt;dbl&gt; NA, NA, 2.441711, NA, 1.037454, NA, 4.089539, 4.300…
+$ Total        &lt;dbl&gt; 509, 3118, 5447, 6707, 5687, 7671, 13938, 10440, 19…
+$ diverse      &lt;chr&gt; "Diverse", "Extremely undiverse", "Diverse", "Extre…
+$ variance     &lt;dbl&gt; NA, NA, 0.011556081, NA, NA, NA, 0.031555535, 0.002…
+$ int_group    &lt;chr&gt; NA, NA, "Highly integrated", NA, NA, NA, "Highly in…
+```
+
+---
+
+# Имињата на колоните со мали букви
+
+Ова е трансформација заради олеснување. Сакаме кога ќе правиме други трансформации да не грешиме во **Total** или **d_Locale** како што се оригиналните имиња на колоните.
+
+
+```r
+names(school_diversity) &lt;- c("leaid", "lea_name", "state", "locale", "school_year", "aian", "asian", "black", "hispanic", "white", "multi", "total", "diverse", "variance", "int_group")
+```
+
+---
+
+# Две визуелизации, идеи?
+
+![buble chart](03-tt-39_files/Screenshot_20190923_182920.png)
+
+Секој круг да биде вредноста од **total**. Но тоа можеби се премногу податоци за на еден графикон (27.944). Можеби подобро групирање по тип (урбано/рурално/итн.) и посебни графикони (facet) да бидат регионите од САД. Но, нив ги нема во податоците.
+
+---
+
+# Идеи, продолжено (за направи сам :-))
+
+![bar chart](03-tt-39_files/Screenshot_20190923_185113.png)
+
+По сличен начин на размислување, групирај ги податоците по држава и подели ги (facet) по региони, така што за секоја држава ќе има по еден **bar** што ќе покажува ентичка распределба на учениците.
+
+---
+
+# Региони во САД? 
+
+
+```r
+NE.abrv &lt;- c("CT","ME","MA","NH","RI","VT","NJ","NY","PA")
+
+MW.abrv &lt;- c("IN","IL","MI","OH","WI","IA","KS","MN","MO","NE",
+             "ND","SD")
+
+S.abrv &lt;- c("DE","DC","FL","GA","MD","NC","SC","VA","WV","AL",
+            "KY","MS","TN","AR","LA","OK","TX")
+
+W.abrv &lt;- c("AZ","CO","ID","NM","MT","UT","NV","WY","AK","CA",
+            "HI","OR","WA")
+
+NE_tbl &lt;- tibble(state=NE.abrv, region="Northeast")
+MW_tbl &lt;- tibble(state=MW.abrv, region="Midwest")
+S_tbl  &lt;- tibble(state=S.abrv,  region="South")
+W_tbl  &lt;- tibble(state=W.abrv,  region="West")
+```
+
+Не ги знаев регионите, ги ископирав од [интернет](https://stackoverflow.com/questions/46066974/add-column-to-label-u-s-states-by-their-u-s-census-region).
+
+---
+
+# Потоа спојуваме сѐ во еден tibble
+
+
+```r
+region_df &lt;- dplyr::bind_rows(NE_tbl, MW_tbl, S_tbl, W_tbl)
+
+school_diversity_w_regions &lt;- dplyr::left_join(x = school_diversity, y = region_df, by="state")
+```
+
+Што е tibble? R специфичен формат на dataframe што се користи во tidyverse. Не мора да се грижите за тоа сега.
+
+---
+# Конструктивна дигресија
+
+Можеби забележавте дека **спојувањето** се прави со **left_join**.
+
+**dplyr** (што е библиотека дел од **tidyverse**) (и уште повеќе **dbplyr**) можат да се поврзат со надворешни бази на податоци (mySQL, PostgressSQL, SQLite) и да работат со податочни сетови кои се преголеми да се чуваат во една csv датотека.
+
+Ова можеби е пренапредно за овој момент во учењето R, но убавото е во тоа што синтаксата е иста, ако научите **dplyr**, освен поврзување со датабазата што изгледа поразлично, сите други команди се исти.
+
+[dplyr](https://db.rstudio.com/dplyr/)
+
+---
+
+
+
+
+
+
+---
+
+# Групирање
+
+
+```r
+sd_grouped &lt;- school_diversity_w_regions %&gt;% 
+  group_by(region, school_year, locale) %&gt;%
+  summarise_at(vars("total"),
+    list("total_per_locale"=sum))
+```
+
+---
+
+# Bubble (slow gg) plot
+
+![](03-tt-39_files/figure-html/bubble plot-1.png)&lt;!-- --&gt;
+
+---
+
+class: split-40
+count: false
+.column[.content[
+
+```r
+*ggplot(data = drop_na(sd_grouped))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_1-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+* aes(x = total_per_locale / 10^5)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_2-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+* labs(x = "Број на ученици (во сто илјади) ")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_3-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+* aes(y = school_year)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_4-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+* labs(y = "Години")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_5-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+* aes(size = total_per_locale)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_6-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+* labs(size = "total_per_locale")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_7-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+* aes(group = locale, color = locale)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_8-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+* scale_colour_viridis_d(option = "plasma")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_9-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+  scale_colour_viridis_d(option = "plasma") +  
+* geom_point(alpha = 0.25)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_10-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+  scale_colour_viridis_d(option = "plasma") +  
+  geom_point(alpha = 0.25) +  
+* geom_jitter(size = 2.5, alpha = 0.25, width = 1)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_11-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+  scale_colour_viridis_d(option = "plasma") +  
+  geom_point(alpha = 0.25) +  
+  geom_jitter(size = 2.5, alpha = 0.25, width = 1) +  
+* facet_grid(rows = vars(region))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_12-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+  scale_colour_viridis_d(option = "plasma") +  
+  geom_point(alpha = 0.25) +  
+  geom_jitter(size = 2.5, alpha = 0.25, width = 1) +  
+  facet_grid(rows = vars(region)) +  
+* ggthemes::theme_fivethirtyeight()
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_13-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+  scale_colour_viridis_d(option = "plasma") +  
+  geom_point(alpha = 0.25) +  
+  geom_jitter(size = 2.5, alpha = 0.25, width = 1) +  
+  facet_grid(rows = vars(region)) +  
+  ggthemes::theme_fivethirtyeight() +  
+* theme(legend.position = "bottom", legend.title = element_blank())
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_14-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+  scale_colour_viridis_d(option = "plasma") +  
+  geom_point(alpha = 0.25) +  
+  geom_jitter(size = 2.5, alpha = 0.25, width = 1) +  
+  facet_grid(rows = vars(region)) +  
+  ggthemes::theme_fivethirtyeight() +  
+  theme(legend.position = "bottom", legend.title = element_blank()) +  
+* theme(panel.spacing.y = unit(0.5, 'cm'))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_15-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+ggplot(data = drop_na(sd_grouped)) +  
+  aes(x = total_per_locale / 10^5) +  
+  labs(x = "Број на ученици (во сто илјади) ") +  
+  aes(y = school_year) +  
+  labs(y = "Години") +  
+  aes(size = total_per_locale) +  
+  labs(size = "total_per_locale") +  
+  aes(group = locale, color = locale) +  
+  scale_colour_viridis_d(option = "plasma") +  
+  geom_point(alpha = 0.25) +  
+  geom_jitter(size = 2.5, alpha = 0.25, width = 1) +  
+  facet_grid(rows = vars(region)) +  
+  ggthemes::theme_fivethirtyeight() +  
+  theme(legend.position = "bottom", legend.title = element_blank()) +  
+  theme(panel.spacing.y = unit(0.5, 'cm')) +  
+* guides(size=FALSE)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_bubble plot_16-1.png)&lt;!-- --&gt;
+]]
+
+---
+
+# Зошто bubble plot беше лоша идеја
+
+1. Не видов дека **SCHOOL_YEAR** се само две години, мислев дека е секоја учебна од 1994 до 2017.
+
+2. Дискусија?
+---
+
+# Направи сам
+
+![bar chart](03-tt-39_files/Screenshot_20190923_185113.png)
+
+---
+
+# Разноликост во американските училишта
+
+Уште една обработка на податоците
+
+
+```r
+reorganized &lt;-
+  school_diversity %&gt;%
+  group_by(state, school_year, diverse) %&gt;%
+  tally() %&gt;%
+  select(state, school_year, diverse, n) %&gt;%
+  mutate(diverse = factor(
+    diverse,
+    levels = c("Extremely undiverse", "Undiverse", "Diverse")
+  )) %&gt;%
+  group_by(state, school_year) %&gt;%
+  mutate(percent = n / sum(n)) %&gt;%
+  filter(school_year == "1994-1995")
+```
+
+---
+# Графикон по држави
+
+![](03-tt-39_files/figure-html/geofacet plot-1.png)&lt;!-- --&gt;
+
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+*library(geofacet)
+```
+]]
+.column[.content[
+
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+*ggplot(data = reorganized)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_2-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+* labs(title="School diversity in the US in 1994-1995")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_3-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+* aes(x=diverse)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_4-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+* labs(x="")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_5-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+* aes(y=percent)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_6-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+* labs(y="")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_7-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+* aes(fill=diverse)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_8-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+* labs(fill="")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_9-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+* geom_col()
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_10-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+* scale_fill_manual(values=c("grey10", "grey40", "forestgreen"))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_11-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+* scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent)
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_12-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+* coord_flip()
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_13-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+* facet_geo(~state, grid = "us_state_grid1")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_14-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+  facet_geo(~state, grid = "us_state_grid1") +  
+* theme_minimal()
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_15-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+  facet_geo(~state, grid = "us_state_grid1") +  
+  theme_minimal()+  
+* theme(
+*   strip.text = element_text(
+*     margin = margin(3, 3, 3, 3)
+*   ))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_19-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+  facet_geo(~state, grid = "us_state_grid1") +  
+  theme_minimal()+  
+  theme(  
+    strip.text = element_text(  
+      margin = margin(3, 3, 3, 3)  
+    )) +  
+* theme(legend.position = "bottom")
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_20-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+  facet_geo(~state, grid = "us_state_grid1") +  
+  theme_minimal()+  
+  theme(  
+    strip.text = element_text(  
+      margin = margin(3, 3, 3, 3)  
+    )) +  
+  theme(legend.position = "bottom") +  
+* theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_21-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+  facet_geo(~state, grid = "us_state_grid1") +  
+  theme_minimal()+  
+  theme(  
+    strip.text = element_text(  
+      margin = margin(3, 3, 3, 3)  
+    )) +  
+  theme(legend.position = "bottom") +  
+  theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1)) +  
+* theme(axis.line.x = element_blank())
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_22-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+  facet_geo(~state, grid = "us_state_grid1") +  
+  theme_minimal()+  
+  theme(  
+    strip.text = element_text(  
+      margin = margin(3, 3, 3, 3)  
+    )) +  
+  theme(legend.position = "bottom") +  
+  theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1)) +  
+  theme(axis.line.x = element_blank()) +  
+* theme(panel.grid.major = element_line(color = "gray80"))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_23-1.png)&lt;!-- --&gt;
+]]
+---
+class: split-40
+count: false
+.column[.content[
+
+```r
+library(geofacet)  
+ggplot(data = reorganized) +  
+  labs(title="School diversity in the US in 1994-1995") +  
+  aes(x=diverse) +  
+  labs(x="") +  
+  aes(y=percent) +  
+  labs(y="") +  
+  aes(fill=diverse) +  
+  labs(fill="") +  
+  geom_col() +  
+  scale_fill_manual(values=c("grey10", "grey40", "forestgreen")) +  
+  scale_y_continuous(breaks=c(0, .5, 1), labels = scales::percent) +  
+  coord_flip() +  
+  facet_geo(~state, grid = "us_state_grid1") +  
+  theme_minimal()+  
+  theme(  
+    strip.text = element_text(  
+      margin = margin(3, 3, 3, 3)  
+    )) +  
+  theme(legend.position = "bottom") +  
+  theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1)) +  
+  theme(axis.line.x = element_blank()) +  
+  theme(panel.grid.major = element_line(color = "gray80")) +  
+* theme(panel.background = element_rect(fill = "gray90"))
+```
+]]
+.column[.content[
+![](03-tt-39_files/figure-html/output_geofacet plot_24-1.png)&lt;!-- --&gt;
+]]
+---
+
+&lt;style type="text/css"&gt;
+.remark-code{line-height: 1.5; font-size: 80%}
+&lt;/style&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:10",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

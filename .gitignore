@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 TidyTuesdayAtKIKA.Rproj
+*.html
+*.png
+*.pdf
