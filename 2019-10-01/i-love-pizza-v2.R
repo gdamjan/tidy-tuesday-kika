@@ -144,8 +144,8 @@ PP <- PP +
 PP <- PP +
   theme_minimal() +
   theme(legend.position = 'bottom') +
-  theme(panel.background = element_rect(fill = "grey60", color = "white")) +
-  theme(plot.background = element_rect(fill = "grey60", color = "grey60")) +
+  theme(panel.background = element_rect(fill = "grey80", color = "white")) +
+  theme(plot.background = element_rect(fill = "grey80", color = "grey60")) +
   theme(axis.title = element_text(hjust = 1, size = 12)) +
   theme(axis.text = element_text(hjust = 1, size = 10))
   
