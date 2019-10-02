@@ -26,6 +26,8 @@ jobs:
       run: |
           make DESTDIR=./public dist
           cp index.html ./public/
+          cp 2019-09-17/02-tt-38b.html
+          cp -r 2019-09-17/02-tt-38b-figure
 
     - name: deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v2.3.1
