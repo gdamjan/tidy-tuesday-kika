@@ -276,7 +276,7 @@ reorganized <-
 ---
 # Графикон по држави
 
-```{r geofacet plot, echo = F, eval = T, fig.width=12}
+```{r geofacet plot, echo = F, eval = F, fig.width=12}
 library(geofacet)
 ggplot(data = reorganized) + 
   labs(title="School diversity in the US in 1994-1995") +
