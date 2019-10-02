@@ -124,6 +124,7 @@ annot <-
 annot <-
   annot + 
   theme(legend.position = 'top') +
+  coord_cartesian() +
   scale_fill_gradient2(name="Difference in rating",
                        low = "purple", 
                        mid = "darkgrey", 
