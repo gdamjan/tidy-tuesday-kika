@@ -19,12 +19,14 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: install deps
+      run: make deps
+
     - name: compile all Rmd to htmls
       run: make
 
     - name: compile all Rmd to htmls
       run: |
-          make deps 
           make DESTDIR=./public dist
           cp index.html ./public/
           cp 2019-09-17/02-tt-38b.html
