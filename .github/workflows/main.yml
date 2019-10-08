@@ -24,6 +24,7 @@ jobs:
 
     - name: compile all Rmd to htmls
       run: |
+          make deps 
           make DESTDIR=./public dist
           cp index.html ./public/
           cp 2019-09-17/02-tt-38b.html
