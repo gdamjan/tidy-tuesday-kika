@@ -19,8 +19,8 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: install deps
-      run: make deps
+      #- name: install deps
+      #run: make deps
 
     - name: compile all Rmd to htmls
       run: make
