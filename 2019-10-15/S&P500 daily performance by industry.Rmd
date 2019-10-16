@@ -1,0 +1,163 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE)
+```
+
+
+```{r, eval=FALSE}
+library("tidyverse")
+library("treemapify")
+library("quantmod")
+library("BatchGetSymbols")
+options(scipen = 999)
+```
+
+
+Functions. date_converter converts a date from the form 2019-10-11 to string "October 11, 2019" to use in naming the graphs later. is_weekend checks if the supplied date is on the weekend, and returns the date of the friday before that weekend, because stock markets close on weekends.
+```{r}
+date_converter <- function(date) {
+  months <- c("January","February","March","April","May","June","July","August","September", "October","November","December")
+  converted_date <- paste(months[as.numeric(substring(date, 6, 7))],paste0(substring(date, 9, 10),","), substring(date,1,4))
+  return(converted_date)
+}
+
+
+is_weekend <- function(date) {
+if (weekdays(date)=="Saturday"){
+  return(date-1)
+} else if (weekdays(date)=="Sunday") {
+  return(date-2)
+} else {
+  return(date)
+}}
+
+```
+
+
+Get the data. Downloads a dataframe of all stocks, and a daily price chart.
+```{r}
+
+first.date <- Sys.Date()
+last.date <- Sys.Date()+1
+
+#last.date <- as.Date("2019-10-16")
+#first.date <- as.Date("2019-10-15")
+
+freq.data <- 'daily'
+
+stock_list <- GetSP500Stocks()
+tickers <- stock_list$Tickers
+tickers_test <- c("MMM","FB","AAPL")
+
+l.out <- BatchGetSymbols(tickers= tickers,
+                         first.date = first.date,
+                         last.date = last.date)
+```
+
+
+```{r}
+#market cap dataset
+market_cap <- getQuote(tickers, what=yahooQF("Market Capitalization"))
+market_cap <- tibble::rownames_to_column(market_cap, "ticker")
+market_cap <- market_cap %>% 
+  select(-"Trade Time")
+names(market_cap)<-str_replace_all(names(market_cap), c(" " = "." , "," = "" ))
+
+```
+
+
+```{r}
+
+stock_list$ticker <- stock_list$Tickers
+
+stock_list <- stock_list %>% 
+  select(-Tickers)
+
+stock_perf <- l.out$df.tickers
+
+stock_list_perf <- merge(stock_list, stock_perf, by="ticker")
+
+stock_list_perf <- merge(stock_list_perf, market_cap, by="ticker")
+
+```
+
+
+```{r}
+stock_list_perf <- stock_list_perf %>% 
+  filter(price.open>0) %>% 
+  mutate(
+    price.change.prop=(price.close-price.open)/price.open,
+  )
+```
+
+
+```{r}
+industry_perf <- stock_list_perf %>% 
+  group_by(GICS.Sector) %>% 
+  summarize(
+    number_stocks=n(),
+    market_cap=sum(Market.Capitalization),
+    price.change.prop=weighted.mean(price.change.prop, Market.Capitalization, na.rm=T),
+    #price.change.prop=mean(price.change.prop),
+    price.change.percent=paste0(round(price.change.prop*100,2),"%")
+    )
+industry_perf
+```
+
+
+```{r fig.width=9, fig.height=6}
+
+windowsFonts(Ubuntu=windowsFont("Ubuntu"))
+
+ggplot(data=industry_perf, 
+       mapping=aes(area=market_cap, 
+                   fill=price.change.prop, 
+                   subgroup=price.change.prop,
+                   layout="scol")) +
+  geom_treemap()+
+  geom_treemap_text(aes(label=GICS.Sector), 
+                    family="Ubuntu",
+                    size = 14,
+                    colour = "#292929",
+                    place = "top", 
+                    reflow=TRUE,
+                    padding.x = grid::unit(2, "mm"),
+                    padding.y = grid::unit(5, "mm"))+
+  geom_treemap_text(aes(label=price.change.percent), 
+                    family="Ubuntu",
+                    size=21,
+                    colour = "#292929", 
+                    place="bottom", 
+                    reflow=TRUE,
+                    padding.x = grid::unit(2, "mm"), 
+                    padding.y = grid::unit(8, "mm"))+
+  geom_treemap_subgroup_border(color="#292929", 
+                               size=1)+
+  scale_fill_gradientn(colours = c("#590000","#b50a00","white","#00ba0c","#035900"), 
+                       limits = c(-0.03, 0.03),
+                       guide=FALSE)+
+  labs(title=paste("S&P500 Industry Performance for", date_converter(is_weekend(first.date))),
+       caption = "Ljupcho.com")+
+  theme(text = element_text(family = "Ubuntu",color = "#292929"),
+        plot.title = element_text(size=18))
+
+```
+
+
+```{r}
+ggsave(paste0("S&P-Industry-Perf-",first.date,".png"), width = 8, height = 7)
+print(paste0("S&P-Industry-Perf-",first.date,".png"))
+```
+
+
+
+
+
+

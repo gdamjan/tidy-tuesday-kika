@@ -1,0 +1,104 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE)
+```
+
+
+```{r}
+library("tidyverse")
+library("treemapify")
+library("rvest")
+```
+
+
+```{r}
+mbi10 <- read_html("https://www.mse.mk/")
+
+mbi10table<- mbi10 %>% 
+  html_nodes("table") %>% 
+  html_table()
+```
+
+
+```{r}
+mbi10table2 <- mbi10table[[3]]
+```
+
+
+```{r}
+mbi_market_cap <- read_html("https://www.mse.mk/mk/content/13/3/2010/structure-of-index-mbi10")
+
+mbi_market_cap2 <- mbi_market_cap %>% 
+  html_nodes("table")
+
+```
+
+
+```{r}
+mbi_market_cap <- tibble::tribble(
+                        ~name, ~ticker, ~num_stocks, ~market_cap_old,          
+            "????????.??????",  "ALK",  "1.431.353",  "185.412.955",
+     "????????? ????? ??????",  "STB", "17.460.180",  "15.521.674",
+              "?????? ??????", "GRNT",  "3.071.377",  "35.390.503",
+  "???????????? ????? ??????",  "KMB",  "2.279.067", "172.658.269",
+           "????????? ??????",  "MPT",    "112.382",  "86.526.481",
+           "??? ????? ??????",  "TTK",    "907.888",  "10.875.790",
+  "?????????? ??????? ??????",  "TEL", "95.838.780",  "18.935.561",
+    "???????????????? ??????", "MTUR",    "452.247",  "19.249.542",
+           "??? ????? ??????",  "TNB",    "854.061",  "27.359.615",
+      "???????? ????? ??????",  "OHB",    "516.350",  "12.950.421"
+  )
+
+mbi_market_cap <- mbi_market_cap %>% 
+  dplyr::select(-name)
+
+mbi10 <- inner_join(mbi_market_cap, mbi10table2, by=c("ticker" ="Шифра"))
+```
+
+
+```{r}
+
+mbi10$market_cap_old <- gsub("\\.", "", mbi10$market_cap_old)
+
+mbi10$market_cap_old <- as.numeric(mbi10$market_cap_old)
+
+names(mbi10) <- c("ticker","num_stocks","market_cap_old","avg_price","percent_change","promet")
+
+
+mbi10$percent_change <- as.numeric(sub(",", ".", mbi10$percent_change, fixed = TRUE))
+
+```
+
+```{r}
+mbi10 <- mbi10 %>% 
+  map_df(as.numeric())
+
+glimpse(mbi10)
+```
+
+
+```{r}
+ggplot(data=mbi10, 
+       mapping=aes(area=market_cap_old, 
+                   fill=percent_change)) +
+  geom_treemap()+
+  scale_fill_gradientn(colours = c("#590000","#b50a00","white","#00ba0c","#035900"), 
+                       limits = c(-5, 5),
+                       guide=FALSE)+
+  geom_treemap_text(aes(label=ticker))+
+  geom_treemap_text(aes(label=percent_change), place="bottom")
+
+```
+
+
+
+
+
+
