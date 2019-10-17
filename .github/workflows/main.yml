@@ -27,11 +27,11 @@ jobs:
     - name: compile all Rmd to htmls
       run: make
 
-    - name: compile all Rmd to htmls
+    - name: prepare for distribution
       run: |
           make DESTDIR=./public dist
           cp index.html ./public/
-          
+
     - name: deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v2.3.1
       env:
