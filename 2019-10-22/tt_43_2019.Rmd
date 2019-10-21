@@ -1,0 +1,73 @@
+---
+title: "Tidy Tuesday 43 / 2019"
+output: html_notebook
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, fig.path = 'figures3/',
+                      echo = TRUE, eval = FALSE, warning = FALSE, message = FALSE)
+```
+
+
+Libraries
+
+```{r}
+library(tidyverse)
+```
+
+
+Load the data
+
+```{r}
+horror_movies <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-22/horror_movies.csv")
+```
+
+
+```{r}
+glimpse(horror_movies)
+```
+
+# Што треба да се поправи во податоците?
+- **release_date** да биде соодветен датум формат а на **<chr>**;
+- **movie_run_time** можеби треба да се вика **mins** и да ги има само минутите во колоната;
+- **budget** да биде една валута; 
+
+# Идеи за графици?
+- Wordcloud за plot?
+- Мапа на локации за снимање?
+- ...?
+
+
+# Wordcloud за заплетот на филмовите
+
+```{r}
+#install.packages('wordcloud')
+#install.packages("tm")
+library(wordcloud)
+library(tm)
+```
+
+Потребно е да се направи corpus од заплетите за понатамошна обработка.
+
+```{r}
+txtplot <- horror_movies %>% 
+  select(matches = "plot") %>% 
+  VectorSource() %>% 
+  Corpus()
+
+#inspect(txtplot)
+```
+
+```{r}
+
+replace_symbols <- function(x, pattern) {
+  gsub(pattern, " ", x)
+}
+
+to_space <- content_transformer(replace_symbols)
+
+txtplot <- tm_map(txtplot, to_space, "/")
+txtplot <- tm_map(txtplot, to_space, "@")
+txtplot <- tm_map(txtplot, to_space, "\\|")
+```
+
