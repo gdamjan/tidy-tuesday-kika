@@ -66,6 +66,75 @@ txtplot_clean <- txtplot %>%
 ```
 
 ```{r}
+#using datapasta
+popnames <- tibble::tribble(
+                    ~Rank,         ~MName,   ~MNumber,       ~WName,   ~WNumber,
+                        1,       "James",   4764644,      "Mary",   3328565,
+                        2,        "John",   4546819,  "Patricia",   1562727,
+                        3,      "Robert",   4535897,  "Jennifer",   1466854,
+                        4,     "Michael",   4323074,     "Linda",   1448194,
+                        5,     "William",   3631876, "Elizabeth",   1436232,
+                        6,       "David",   3560660,   "Barbara",   1406173,
+                        7,     "Richard",   2477879,     "Susan",   1105188,
+                        8,      "Joseph",   2367801,   "Jessica",   1044492,
+                        9,      "Thomas",   2167014,     "Sarah",    995436,
+                       10,     "Charles",   2124748,     "Karen",    985261,
+                       11, "Christopher",   2025963,     "Nancy",    971838,
+                       12,      "Daniel",   1882400,  "Margaret",    968332,
+                       13,     "Matthew",   1591773,      "Lisa",    964705,
+                       14,     "Anthony",   1400849,     "Betty",    948725,
+                       15,      "Donald",   1357533,   "Dorothy",    878637,
+                       16,        "Mark",   1345366,    "Sandra",    873403,
+                       17,        "Paul",   1296573,    "Ashley",    845462,
+                       18,      "Steven",   1279636,  "Kimberly",    836685,
+                       19,      "Andrew",   1248926,     "Donna",    824044,
+                       20,     "Kenneth",   1231665,     "Emily",    820233,
+                       21,      "Joshua",   1208231,  "Michelle",    810244,
+                       22,      "George",   1181255,     "Carol",    808228,
+                       23,       "Kevin",   1169693,    "Amanda",    772427,
+                       24,       "Brian",   1165284,   "Melissa",    752207,
+                       25,      "Edward",   1114165,   "Deborah",    739570,
+                       26,      "Ronald",   1073235, "Stephanie",    737514,
+                       27,     "Timothy",   1067263,   "Rebecca",    729638,
+                       28,       "Jason",   1031730,     "Laura",    723960,
+                       29,     "Jeffrey",    974219,    "Sharon",    720799,
+                       30,        "Ryan",    931422,   "Cynthia",    705556,
+                       31,       "Jacob",    915562,  "Kathleen",    691649,
+                       32,        "Gary",    899587,     "Helen",    685877,
+                       33,    "Nicholas",    888450,       "Amy",    679793,
+                       34,        "Eric",    875444,   "Shirley",    671283,
+                       35,     "Stephen",    840568,    "Angela",    657793,
+                       36,    "Jonathan",    838634,      "Anna",    639947,
+                       37,       "Larry",    802473,    "Brenda",    606269,
+                       38,      "Justin",    774858,    "Pamela",    592685,
+                       39,       "Scott",    769294,    "Nicole",    586880,
+                       40,     "Brandon",    756415,      "Ruth",    586566,
+                       41,       "Frank",    722122, "Katherine",    577232,
+                       42,    "Benjamin",    719558,  "Samantha",    572632,
+                       43,     "Gregory",    706323, "Christine",    565140,
+                       44,      "Samuel",    705094,      "Emma",    557929,
+                       45,     "Raymond",    690233, "Catherine",    557454,
+                       46,     "Patrick",    662614,     "Debra",    548270,
+                       47,   "Alexander",    656997,  "Virginia",    546942,
+                       48,        "Jack",    636163,    "Rachel",    546198,
+                       49,      "Dennis",    611399,   "Carolyn",    543284,
+                       50,       "Jerry",    603209,     "Janet",    543129
+                    )
+
+
+popnames_long <- popnames %>% 
+  select(contains("Name")) %>% 
+  pivot_longer(c("MName", "WName"), names_to = "type", values_to = "word") %>% 
+  select(-"type") %>% 
+  map_df(., str_to_lower)
+```
+
+```{r}
+txtplot_clean <- txtplot_clean %>%
+  anti_join(popnames_long, by = "word") 
+```
+
+```{r}
 # remove numbers
 nums <-  txtplot_clean %>% 
   filter(str_detect(word, "^[0-9]")) %>% 
@@ -79,37 +148,57 @@ txtplot_clean <- txtplot_clean %>%
 
 ```{r}
 # remove unique stop words that snuck in there
-uni_sw <- data.frame(word = c("directed","michael","john", "david", "james", "film", "horror"))
+uni_sw <- data.frame(word = c("directed", "film", "horror", "michael","john", "david", "james", 
+                              "robert", "tom", "adam", "bryan", "scott", "joe", "ryan", "lee",
+                              "patrick", "de", "alex", "matt", "tony", "josh", "chris", "mike"))
 
 txtplot_clean <- txtplot_clean %>% 
   anti_join(uni_sw, by = "word")
 ```
 
-#Plot the the horro plots
-```{r}
-words_to_plot <-  top_n(txtplot_clean, 15, wt = n)
+#Plot the the horror plots
+```{r, fig.height=8, fig.width=8}
+words_to_plot <-  top_n(txtplot_clean, 20, wt = n)
 
-img <- png::readPNG("./halloween-pumpkin-xxl.png")
+img <- png::readPNG("./hp.png")
 
 ggplot(words_to_plot) +
   aes(label = word) +
   aes(size = n, color = n) +
-  geom_text_wordcloud() + 
-  scale_size_area(max_size = 24) +
-  theme_void() + 
+  ggpubr::background_image(img) +
+  #geom_text_wordcloud() +
+  geom_text_wordcloud_area(shape = "pentagon") +
+  scale_size_area(max_size = 12) +
+  theme_void() +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(caption = "A PLOT OF TWENTY MOST POPULAR WORDS THAT MAKE A HORROR MOVIE PLOT") + 
+  theme(plot.caption = element_text(face = "bold", hjust = 0.5, size = rel(1.2)))
+```
+
+
+```{r, fig.height=5, fig.width=5}
+words_to_skull <-  top_n(txtplot_clean, 60, wt = n)
+
+img <- png::readPNG("./skull-lines.png")
+
+ggplot(words_to_skull) +
+  aes(label = word) +
+  aes(size = n, color = n) +
+  ggpubr::background_image(img) +
+  geom_text_wordcloud_area(
+    mask = png::readPNG("./skull.png"),
+    rm_outside = TRUE) +
+  scale_size_area(max_size = 8) +
+  theme_void() +
   scale_color_gradient(low = "darkred", high = "red") +
-  ggpubr::background_image(img)
+  labs(caption = "A PLOT OF THE MOST POPULAR\n WORDS THAT MAKE A HORROR MOVIE PLOT") + 
+  theme(plot.caption = element_text(face = "bold", hjust = 0.5, size = rel(1.2)))
+
 
 ```
+
 
 ## Ratings
-
-```{r}
-horror_movies <-
-  readr::read_csv(
-    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-22/horror_movies.csv"
-  )
-```
 
 How do budget and rating relate to genres? Is a horror movie more likely to be highly rated if
 it is also a comedy vs. drama vs. thriller. 
@@ -155,7 +244,7 @@ for (i in seq_along(common_genres)) {
 glimpse(horror_movies)
 ```
 
-Now we can convert to long format such that we have one column for the different genres after parsing
+# Now we can convert to long format such that we have one column for the different genres after parsing
 
 ```{r}
 hm <-
@@ -165,7 +254,7 @@ hm <-
                values_to = "parsed_values")
 ```
 
-Plot:
+# Plot:
 
 Review ratings
 
@@ -184,7 +273,7 @@ Movie run time
 ```{r}
 # filter for only secondary genres
 hm %>% filter(!is.na(parsed_values), !parsed_values == "Horror") %>%
-  mutate(mrt=str_remove(movie_run_time, " min") %>% as.numeric()) %>% 
+  mutate(mrt = str_remove(movie_run_time, " min") %>% as.numeric()) %>% 
   ggplot(data = .) +
   aes(x = parsed_values) +
   aes(y = mrt) +
@@ -201,8 +290,8 @@ hm %>% mutate(budget_num = readr::parse_number(budget)) %>%
   aes(x = parsed_values) +
   aes(y = budget_num) +
   geom_violin(alpha = .6, draw_quantiles = c(0.95, 0.75, 0.5, 0.25, 0.5), trim = TRUE) +
-  scale_y_continuous(trans="log10", breaks=10^(1:10), labels = scales::dollar_format()) +
+  scale_y_continuous(trans = "log10", breaks = 10^(1:10), labels = scales::dollar_format()) +
   coord_flip() +
-  theme(axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 ```
 
