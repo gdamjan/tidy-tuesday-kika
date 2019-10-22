@@ -1,6 +1,8 @@
 ---
 title: "Tidy Tuesday 43 / 2019"
 output: html_notebook
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r global_options, include=FALSE}
@@ -35,8 +37,7 @@ glimpse(horror_movies)
 # Идеи за графици?
 - Wordcloud за plot?
 - Мапа на локации за снимање?
-- ...?
-
+- Однос помеѓу под-жанрови и буџет, времетраење на филм, и рејтинг 
 
 # Wordcloud за заплетот на филмовите
 
@@ -69,5 +70,109 @@ to_space <- content_transformer(replace_symbols)
 txtplot <- tm_map(txtplot, to_space, "/")
 txtplot <- tm_map(txtplot, to_space, "@")
 txtplot <- tm_map(txtplot, to_space, "\\|")
+```
+
+## Ratings
+
+```{r}
+horror_movies <-
+  readr::read_csv(
+    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-22/horror_movies.csv"
+  )
+```
+
+How do budget and rating relate to genres? Is a horror movie more likely to be highly rated if
+it is also a comedy vs. drama vs. thriller. 
+
+Parse the genres of a movie. My approach was to create a column for each genre and record whether a movie is classified (TRUE) as that genre
+
+```{r}
+# first, a list of unique genres
+(
+  genres <- horror_movies %>%
+    pull(genres) %>%
+    str_split(pattern = "\\| ") %>%
+    unlist %>%
+    sort %>%
+    unique
+)
+```
+
+There are many subgenres, so do a count and take the most common ones (keep subgenres with at least 100 movies)
+
+```{r}
+(
+  common_genres <- horror_movies %>%
+    pull(genres) %>%
+    str_split(pattern = "\\| ") %>%
+    unlist %>%
+    table %>%
+    as_tibble() %>%
+    arrange(desc(n)) %>%
+    filter(n > 100) %>%
+    pull(1)
+)
+```
+
+Now add 10 columns to the horror_movies dataset
+
+```{r}
+for (i in seq_along(common_genres)) {
+  horror_movies[[common_genres[i]]] <-
+    ifelse(str_detect(horror_movies$genres, common_genres[i]), common_genres[i], NA)
+}
+
+glimpse(horror_movies)
+```
+
+Now we can convert to long format such that we have one column for the different genres after parsing
+
+```{r}
+hm <-
+  horror_movies %>% 
+  pivot_longer(cols = common_genres,
+               names_to = "parsed_genres",
+               values_to = "parsed_values")
+```
+
+Plot:
+
+Review ratings
+
+```{r}
+# filter for only secondary genres
+hm %>% filter(!is.na(parsed_values), !parsed_values == "Horror") %>%
+  ggplot(data = .) +
+  aes(x = parsed_values) +
+  aes(y = review_rating) +
+  geom_violin(alpha = .6, draw_quantiles = c(0.95, 0.75, 0.5, 0.25, 0.5), trim = TRUE) +
+  coord_flip() 
+```
+
+Movie run time
+
+```{r}
+# filter for only secondary genres
+hm %>% filter(!is.na(parsed_values), !parsed_values == "Horror") %>%
+  mutate(mrt=str_remove(movie_run_time, " min") %>% as.numeric()) %>% 
+  ggplot(data = .) +
+  aes(x = parsed_values) +
+  aes(y = mrt) +
+  geom_violin(alpha = .6, draw_quantiles = c(0.95, 0.75, 0.5, 0.25, 0.5), trim = TRUE) +
+  coord_flip()
+```
+
+
+Budget, needs to be cleaned
+
+```{r}
+hm %>% mutate(budget_num = readr::parse_number(budget)) %>% 
+  ggplot(data = .) +
+  aes(x = parsed_values) +
+  aes(y = budget_num) +
+  geom_violin(alpha = .6, draw_quantiles = c(0.95, 0.75, 0.5, 0.25, 0.5), trim = TRUE) +
+  scale_y_continuous(trans="log10", breaks=10^(1:10), labels = scales::dollar_format()) +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 ```
 
