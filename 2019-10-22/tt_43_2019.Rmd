@@ -41,33 +41,63 @@ glimpse(horror_movies)
 # Wordcloud за заплетот на филмовите
 
 ```{r}
-#install.packages('wordcloud')
-#install.packages("tm")
-library(wordcloud)
-library(tm)
-```
+#install.packages('ggwordcloud')
+#install.packages("tidytext")
+#there are alternatives: wordcloud and tm 
 
-Потребно е да се направи corpus од заплетите за понатамошна обработка.
+library(ggwordcloud)
+library(tidytext)
+```
 
 ```{r}
 txtplot <- horror_movies %>% 
-  select(matches = "plot") %>% 
-  VectorSource() %>% 
-  Corpus()
+  select(matches("plot")) %>% 
+  unnest_tokens(word, plot) %>% 
+  dplyr::count(word, sort = TRUE)
+```
 
-#inspect(txtplot)
+
+Чистење на податоците од т.н. stop words и бројки
+```{r}
+data("stop_words")
+txtplot_clean <- txtplot %>%
+  anti_join(stop_words)
 ```
 
 ```{r}
+# remove numbers
+nums <-  txtplot_clean %>% 
+  filter(str_detect(word, "^[0-9]")) %>% 
+  select(word) %>% 
+  unique()
 
-replace_symbols <- function(x, pattern) {
-  gsub(pattern, " ", x)
-}
+txtplot_clean <- txtplot_clean %>% 
+  anti_join(nums, by = "word")
+```
 
-to_space <- content_transformer(replace_symbols)
 
-txtplot <- tm_map(txtplot, to_space, "/")
-txtplot <- tm_map(txtplot, to_space, "@")
-txtplot <- tm_map(txtplot, to_space, "\\|")
+```{r}
+# remove unique stop words that snuck in there
+uni_sw <- data.frame(word = c("directed","michael","john", "david", "james", "film", "horror"))
+
+txtplot_clean <- txtplot_clean %>% 
+  anti_join(uni_sw, by = "word")
+```
+
+#Plot the the horro plots
+```{r}
+words_to_plot <-  top_n(txtplot_clean, 15, wt = n)
+
+img <- png::readPNG("./halloween-pumpkin-xxl.png")
+
+ggplot(words_to_plot) +
+  aes(label = word) +
+  aes(size = n, color = n) +
+  geom_text_wordcloud() + 
+  scale_size_area(max_size = 24) +
+  theme_void() + 
+  scale_color_gradient(low = "darkred", high = "red") +
+  ggpubr::background_image(img)
+
 ```
 
