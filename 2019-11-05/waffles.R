@@ -1,0 +1,98 @@
+library(tidyverse)
+# devtools::install_github("hrbrmstr/waffle")
+# devtools::install_github("hrbrmstr/hrbrthemes")
+library(hrbrthemes)
+library(waffle)
+
+# neat examples for waffle plots:
+# https://github.com/hrbrmstr/waffle
+
+commute_mode <-
+  readr::read_csv(
+    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-11-05/commute.csv"
+  )
+
+# fix some entries
+commute_mode$state_region[commute_mode$state == "Ca"] <- "West"
+commute_mode$state_region[commute_mode$state == "Massachusett"] <- "Northeast"
+commute_mode$state_abb[commute_mode$state == "Ca"] <- "CA"
+commute_mode$state_abb[commute_mode$state == "Massachusett"] <- "MA"
+commute_mode$state[commute_mode$state == "Ca"] <- "California"
+commute_mode$state[commute_mode$state == "Massachusett"] <- "Massachusetts"
+
+commute_mode$state_region[commute_mode$state == "District of Columbia"] <- "Northeast"
+commute_mode$state_abb[commute_mode$state == "District of Columbia"] <- "D.C."
+
+
+# Aggregate by state and make a waffle with facet?
+
+by_state <- 
+  commute_mode %>% 
+  group_by(state_region, state, state_abb, mode) %>% 
+  summarise_at(.vars = vars("n"), .funs = list("sum"))
+
+# should be empty
+by_state %>% filter(is.na(state_region))
+
+by_state %>% filter(state_abb == "CA") %>%
+  ggplot(data = ., aes(
+    fill = mode,
+    values = n / 1000
+  )) +
+  geom_waffle(n_rows = 10, colour="white") +
+  scale_fill_manual(
+    name = NULL,
+    values = c("#a40000", "#c68958"),
+    labels = c("Bike", "Walk")
+  ) +
+  coord_equal() +
+  theme_ipsum_rc(grid="") +
+  theme_enhance_waffle()
+  
+
+if (FALSE) {
+  # difficult to plot and facet 50 
+(
+  state_waffle <-
+    ggplot(data = by_state, aes(fill = mode, values = n/5000)) +
+    geom_waffle(n_rows = 20, size=.5, colour="white", flip = TRUE) +
+    scale_fill_manual(
+      name = NULL,
+      values = c("#a40000", "#c68958"),
+      labels = c("Bike", "Walk")
+    ) +
+    coord_equal() +
+    theme_minimal() +
+    theme_enhance_waffle() +
+    facet_wrap("state_abb")
+)
+
+ggsave(state_waffle, filename = "2019-11-05/state_waffle.pdf")
+}
+
+
+# Aggregate by region instead
+
+by_region <- 
+  commute_mode %>% 
+  group_by(state_region, mode) %>% 
+  summarise_at(.vars = vars("n"), .funs = list("sum"))
+
+if (TRUE) {
+  (
+    state_waffle <-
+      ggplot(data = by_region, aes(fill = mode, values = n/5000)) +
+      geom_waffle(n_rows = 20, size=.5, colour="white", flip = TRUE) +
+      scale_fill_manual(
+        name = NULL,
+        values = c("#a40000", "#c68958"),
+        labels = c("Bike", "Walk")
+      ) +
+      coord_equal() +
+      theme_minimal() +
+      theme_enhance_waffle() +
+      facet_wrap("state_region")
+  )
+  
+  ggsave(state_waffle, filename = "2019-11-05/region_waffle.pdf")
+}
