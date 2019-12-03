@@ -1,0 +1,156 @@
+---
+title: "open.finance.gov.mk"
+output: html_notebook
+---
+
+```{r}
+library(dbplyr)
+library(lubridate)
+library(tidyverse)
+library(readr)
+library(stringr)
+library(gghighlight)
+```
+
+```{r}
+data <- read_delim("~/src/openfinance/data.csv", 
+    ";", escape_double = FALSE, 
+    col_types = cols(`Data na priem` = col_character(), 
+    `Data na valuta` = col_character(),
+    `Account na primac` = col_character()), 
+    trim_ws = TRUE)
+```
+
+```{r}
+openfinance <- DBI::dbConnect(RSQLite::SQLite(), dbname = "openfinance.db")
+```
+
+```{r}
+copy_to(openfinance, data, "transactions",
+  temporary = FALSE)
+```
+
+
+```{r}
+DBI::dbDisconnect(openfinance)
+```
+
+```{r}
+izvrsiteli <- as_tibble(tbl(openfinance, "izv"))
+```
+
+```{r}
+izv <- tbl(openfinance, "transactions") %>% 
+  filter(`Naziv na primac` %LIKE% "ИЗВРШИТЕЛ%")  %>%
+  #show_query()
+  collect()
+```
+
+```{sql, connection=openfinance}
+SELECT * FROM transactions WHERE "Naziv na primac" LIKE "ИЗВРШИТЕЛ%";
+```
+
+```{r}
+izvmonth <- izvrsiteli %>% 
+  mutate(valuta = ymd(`Data na valuta`)) %>% 
+  mutate(valuta = floor_date(valuta, unit = "month")) %>% 
+  group_by(valuta) %>% 
+  summarise_at(vars(Iznos), sum)
+```
+
+```{r}
+ggplot(izvmonth) +
+  aes(x = valuta, y = Iznos/10^6) +
+  geom_line(color = "darkred") +
+  geom_point(color = "transparent") +
+  geom_text(aes(label = ifelse(Iznos > 200000000, as.character(months(valuta)),'')),hjust = 1, vjust = 0) +
+  geom_area(alpha = .3, fill = "darkred") +
+  #scale_y_continuous(labels = function(x) format(x, big.mark = ".", scientific = FALSE)) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M")) + 
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+    #labs(y = "Исплатени износи во денари") +
+    #labs(x = "Години") +
+    labs(title = "Последниве две години највисоки исплати\nкон извршители од буџетот") +
+    labs(subtitle = "Месечни плаќања кон извршители во милиони денари") +
+    labs(caption = "Извор: open.finance.gov.mk") +
+    ggthemes::theme_fivethirtyeight()
+
+ggsave("1.png")
+```
+
+```{r}
+izvq <- izvrsiteli %>% 
+  mutate(valuta = ymd(`Data na valuta`)) %>% 
+  mutate(valuta = floor_date(valuta, unit = "quarter")) %>% 
+  group_by(valuta) %>% 
+  summarise_at(vars(Iznos), sum())
+```
+
+```{r}
+ggplot(izvq) +
+  aes(x = valuta, y = Iznos/10^6) +
+  geom_line(color = "darkred") +
+  #geom_point(color = "transparent") +
+  #geom_text(aes(label = ifelse(Iznos > 200000000, as.character(months(valuta)),'')),hjust = 1, vjust = 0) +
+  geom_area(alpha = .3, fill = "darkred") +
+  #scale_y_continuous(labels = function(x) format(x, big.mark = ".", scientific = FALSE)) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M")) + 
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+    #labs(y = "Исплатени износи во денари") +
+    #labs(x = "Години") +
+    labs(title = "Последниве две години највисоки исплати\nкон извршители од буџетот") +
+    labs(subtitle = "Тромесечни плаќања кон извршители во милиони денари") +
+    labs(caption = "Извор: open.finance.gov.mk") +
+    ggthemes::theme_fivethirtyeight()
+
+ggsave("2.png")
+```
+
+```{r}
+izvgrouptop <- izvrsiteli %>% 
+  mutate(valuta = ymd(`Data na valuta`)) %>% 
+  mutate(valuta = floor_date(valuta, unit = "quarter")) %>% 
+  group_by(`EDB na primac`, valuta) %>% 
+  summarise_at(vars(Iznos), sum) 
+```
+
+```{r}
+top5 <- izvrsiteli %>% 
+  mutate(valuta = ymd(`Data na valuta`)) %>% 
+  mutate(valuta = floor_date(valuta, unit = "quarter")) %>% 
+  group_by(`EDB na primac`, valuta) %>% 
+  summarise_at(vars(Iznos), sum) %>% 
+  group_by(valuta) %>% 
+  top_n(5, Iznos)
+```
+
+```{r}
+izvgrouped <- izvrsiteli %>% 
+  mutate(valuta = ymd(`Data na valuta`)) %>% 
+  mutate(valuta = floor_date(valuta, unit = "quarter")) %>% 
+  group_by(`EDB na primac`, valuta) %>% 
+  summarise_at(vars(Iznos), sum) %>% 
+  group_by(valuta) %>% 
+  summarise_at(vars(Iznos), c(median, mean)) %>% 
+  ungroup() %>% 
+  rename(median = fn1, mean = fn2) %>% 
+  pivot_longer(cols = c(median, mean), names_to = "med/mean", values_to = "iznos")
+```
+
+```{r}
+ggplot(izvgrouped) + 
+  aes(x = valuta, y = iznos/10^6, color = `med/mean`) +
+  geom_line() 
+  #geom_point(color = "transparent") +
+  #geom_text(aes(label = ifelse(Iznos > 200000000, as.character(months(valuta)),'')),hjust = 1, vjust = 0) +
+#  geom_area(alpha = .3, fill = "darkred")
+```
+
+```{r}
+ggplot(top5) +
+  aes(x  = valuta, y = Iznos/10^6, fill = `EDB na primac`) + 
+  geom_bar(stat = "identity", position = "stack") +
+  guides(fill= FALSE) #+
+#  gghighlight(max(Iznos) > 75000000, label_key = `EDB na primac`, use_direct_label = FALSE) 
+```
+
