@@ -1,18 +1,38 @@
+---
+  title: '#TidyTuesday 5.11.2019: Bike & Walk Commutes'
+author: "teofil"
+date: "5/11/2019"
+output:
+  html_document:
+  df_print: paged
+toc: true
+---
+  
+  ```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      warning = FALSE, message = FALSE)
+```
+
+```{r}
 library(tidyverse)
-# devtools::install_github("hrbrmstr/waffle")
-# devtools::install_github("hrbrmstr/hrbrthemes")
+devtools::install_github("hrbrmstr/waffle")
+devtools::install_github("hrbrmstr/hrbrthemes")
 library(hrbrthemes)
 library(waffle)
+```
 
-# neat examples for waffle plots:
-# https://github.com/hrbrmstr/waffle
+Neat [examples](https://github.com/hrbrmstr/waffle) for waffle plots.
 
+```{r}
 commute_mode <-
   readr::read_csv(
     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-11-05/commute.csv"
   )
+```
 
-# fix some entries
+## Fix some entries
+
+```{r}
 commute_mode$state_region[commute_mode$state == "Ca"] <- "West"
 commute_mode$state_region[commute_mode$state == "Massachusett"] <- "Northeast"
 commute_mode$state_abb[commute_mode$state == "Ca"] <- "CA"
@@ -23,9 +43,12 @@ commute_mode$state[commute_mode$state == "Massachusett"] <- "Massachusetts"
 commute_mode$state_region[commute_mode$state == "District of Columbia"] <- "Northeast"
 commute_mode$state_abb[commute_mode$state == "District of Columbia"] <- "D.C."
 
+```
 
-# Aggregate by state and make a waffle with facet?
 
+## Aggregate by state and make a waffle with facet?
+
+```{r}
 by_state <- 
   commute_mode %>% 
   group_by(state_region, state, state_abb, mode) %>% 
@@ -67,12 +90,14 @@ if (FALSE) {
     facet_wrap("state_abb")
 )
 
-ggsave(state_waffle, filename = "2019-11-05/state_waffle.pdf")
+#ggsave(state_waffle, filename = "2019-11-05/state_waffle.pdf")
 }
 
+```
 
-# Aggregate by region instead
+## Aggregate by region instead
 
+```{r}
 by_region <- 
   commute_mode %>% 
   group_by(state_region, mode) %>% 
@@ -94,5 +119,6 @@ if (TRUE) {
       facet_wrap("state_region")
   )
   
-  ggsave(state_waffle, filename = "2019-11-05/region_waffle.pdf")
+  #ggsave(state_waffle, filename = "2019-11-05/region_waffle.pdf")
 }
+```

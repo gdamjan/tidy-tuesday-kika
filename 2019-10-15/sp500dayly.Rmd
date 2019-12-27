@@ -156,7 +156,7 @@ ggplot(data=industry_perf,
 ```
 
 
-```{r}
+```{r, eval = FALSE}
 ggsave(paste0("S&P-Industry-Perf-",first.date,".png"), width = 8, height = 7)
 print(paste0("S&P-Industry-Perf-",first.date,".png"))
 ```
