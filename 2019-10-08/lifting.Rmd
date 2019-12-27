@@ -1,35 +1,55 @@
+---
+title: '#TidyTuesday 8.10.2019: Powerlifting'
+author: "teofil"
+date: "8/10/2019"
+output:
+  html_document:
+  df_print: paged
+toc: true
+---
+  
+  ```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      warning = FALSE, message = FALSE)
+```
+
+```{r}
 library(tidyverse)
 library(broom)
+```
 
+```{r}
 lifting <-
   ipf_lifts <-
   readr::read_csv(
     "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-08/ipf_lifts.csv"
   )
+```
 
+```{r}
 glimpse(lifting)
+```
 
-# fitting models to grouped data
 
-# convert to long format 
-# such that we have one column
-# weight lifted
+# Fitting models to grouped data
 
+Convert to long format  such that we have one column and  weight lifted.
+
+```{r}
 ll <- lifting_long <- 
   lifting %>% gather(type, weight, starts_with("best"))
 
 ll <- group_by(ll, sex, type)
 
-# now we can fit a linear model of 
-# weight ~ boyweight 
-# while keeping track of relevant
-# groupings
+```
 
-# check these step by step
-# to see what nest does
-# what the map within mutate does
-# and unnest
+## Fit a model
 
+Now we can fit a linear model of  weight ~ boyweight  while keeping track of relevant  groupings.
+
+Check these step by step  to see what nest does  what the map within mutate does  and unnest.
+
+```{r}
 LMs_by_sex_and_type <- 
   ll %>%
   tidyr::nest() %>%
@@ -41,10 +61,12 @@ LMs_by_sex_and_type <-
 # Error: 'vec_dim' is not an exported object from 'namespace:vctrs'
 # reinstall pillar with install.packages('pillar')
 # https://github.com/r-lib/vctrs/issues/487
+```
 
-# now we can ask what are the coefficients
-# of the linear regressions for each group
+## Evaluate the model
 
+Now we can ask what are the coefficients  of the linear regressions for each group
+```{r}
 LMs_by_sex_and_type %>% 
   select(-data, -fit) %>% 
   filter(term == "(Intercept)") %>% 
@@ -55,13 +77,15 @@ LMs_by_sex_and_type %>%
   select(-data, -fit) %>% 
   filter(term == "bodyweight_kg") %>% 
   knitr::kable(caption = "Inercepts for lifted weight by bodyweight by sex and type of lifting")
+```
 
-# neat, everything is significant
+Neat, everything is significant.
 
-# to visualize, we can use this table,
-# or plot the raw data and use geom_smooth
-# while faceting by sex and type (similar to last week)
+## Visualize
 
+To visualize, we can use this table,  or plot the raw data and use geom_smooth while faceting by sex and type.
+
+```{r}
 LMs_by_sex_and_type_wide <- 
   LMs_by_sex_and_type %>% 
   select(sex, type, term, estimate) %>% 
@@ -87,9 +111,7 @@ ggplot(data = LMs_by_sex_and_type_wide) +
   labs(y="weight lifter (kg)") +
   theme_bw() +
   theme(legend.position="top")
+```
 
-# then you can ask are slopes for women higher than men?
-# are slopes significantly different from each other
-# (maybe use likelihood ratio test or anova to compare models)
-# ...
+Then you can ask are slopes for women higher than men? Are slopes significantly different from each other (maybe use likelihood ratio test or anova to compare models).
 
