@@ -1,2 +1,10 @@
 rmarkdown
-xaringan
+ggridges
+ggthemes
+gganimate
+geofacet
+treemapify
+quantmod
+BatchGetSymbols
+ggwordcloud
+tidytext

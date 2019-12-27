@@ -1,17 +1,21 @@
 ---
-title: "R Notebook"
+title: "SP500 daily - надвор од програмата на #TidyTuesday"
+author: "ljupch0"
+date: "15/10/2019"
 output:
   html_document:
     df_print: paged
+    toc: true
 ---
+
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
-                      echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE)
+                      warning = FALSE, message = FALSE)
 ```
 
 
-```{r, eval=FALSE}
+```{r}
 library("tidyverse")
 library("treemapify")
 library("quantmod")
@@ -21,6 +25,7 @@ options(scipen = 999)
 
 
 Functions. date_converter converts a date from the form 2019-10-11 to string "October 11, 2019" to use in naming the graphs later. is_weekend checks if the supplied date is on the weekend, and returns the date of the friday before that weekend, because stock markets close on weekends.
+
 ```{r}
 date_converter <- function(date) {
   months <- c("January","February","March","April","May","June","July","August","September", "October","November","December")

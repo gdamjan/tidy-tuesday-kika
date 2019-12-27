@@ -3,23 +3,18 @@ title: '#TidyTuesday 2 / 10.9.2019: Week 37 Amusement Park Injuries'
 author: "novica"
 date: "10/9/2019"
 output:
-  ioslides_presentation: default
-  slidy_presentation: default
+  html_document:
+    df_print: paged
+    toc: true
 ---
 
-
-<style>
-    slides > slide {
-  overflow-x: auto !important;
-  overflow-y: auto !important;
-}
-</style>
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      warning = FALSE, message = FALSE)
 ```
 
-##
+
+## Intro
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">(1/n) Michael Pollan’s advice if he taught <a href="https://twitter.com/hashtag/Rstats?src=hash&amp;ref_src=twsrc%5Etfw">#Rstats</a>/<a href="https://twitter.com/hashtag/Python?src=hash&amp;ref_src=twsrc%5Etfw">#Python</a> programming for <a href="https://twitter.com/datacarpentry?ref_src=twsrc%5Etfw">@datacarpentry</a>:<br>1. Write code<br>2. Not too much<br>3. Mostly plots</p>&mdash; Dr. Michael Koontz (@_mikoontz) <a href="https://twitter.com/_mikoontz/status/758021742078025728?ref_src=twsrc%5Etfw">July 26, 2016</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -40,8 +35,6 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## The tidyverse
 
-![tidiverse workflow](01_tt_37_files/Screenshot_20190909_195556.png)
-
 The tidyverse is an “opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures.” (source: https://thomasmock.netlify.com/post/tidytuesday-a-weekly-social-data-project-in-r/)
 
 ## TidyTuesday 37 недела, 2 пат КИКА
@@ -57,22 +50,18 @@ A lot of free text this week, some inconsistent NAs (n/a, N/A) and dates (ymd, d
 
 Load the libraries
 
-```{r, echo=TRUE, eval=FALSE}
-library(tidyverse)
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
 ```
 
 ## The code 2
 
-Load the data from github (*NOTE: lines are broken for readibility*)
+Load the data from github
 
-```{r, echo=TRUE, eval=FALSE}
-tx_injuries <- 
-readr::read_csv("https://raw.githubusercontent.com/rfordatascience/
-tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv")
+```{r}
+tx_injuries <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv")
 
-safer_parks <- 
-readr::read_csv("https://raw.githubusercontent.com/rfordatascience/
-tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
+safer_parks <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
 ```
 
 ## The code 3 - чистење на податоците #1 
@@ -81,16 +70,16 @@ tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
 
 Прашање: Колку сѐ можни форми на NA има во податоците?
 
-```{r, echo=TRUE, eval=FALSE}
+```{r}
 glimpse(tx_injuries)
-map(tx_injuries, unique)
+#map(tx_injuries, unique)
 ```
 
 ## The code 3 - чистење на податоците #2
 
 "N/A", "n/a" - колку што можевме да видиме?  **na_if**
 
-```{r, echo=TRUE, eval=FALSE}
+```{r}
 tx_injuries <- tx_injuries %>% 
     mutate(age = na_if(age, "n/a")) %>% 
     mutate(age = na_if(age, "N/A")) %>% 
@@ -103,14 +92,14 @@ tx_injuries <- tx_injuries %>%
     mutate(injury_date = na_if(injury_date, "n/a")) %>% 
     mutate(injury_date = na_if(injury_date, "#########")) 
 
-map(tx_injuries, unique)
+#map(tx_injuries, unique)
 ```
 
 ## The code 3 - чистење на податоците #3
 
 Комплицирано и компјутеризирано барање на NA (за домашна :))
 
-```{r, echo=TRUE, eval=FALSE}
+```{r, eval = FALSE}
 # make a function to mutate a column to fix NAs
 fix_na <- function(vect, na_strings) {
   vect[vect %in% na_strings] <- NA
@@ -135,8 +124,9 @@ tx_injuries_na_fixed <- tx_injuries %>%
 
 Датуми - **lubridate**
 
-```{r, echo=TRUE, eval=FALSE}
-library(lubridate)
+```{r}
+
+suppressPackageStartupMessages(library(lubridate))
 
 tx_injuries$injury_date
 
@@ -157,17 +147,15 @@ tx_injuries$injury_date
 
 Ако се присетите на чистењето на податоците, некако излегува дека решивме да работиме со три променливи кои се различни по тип: `age`, `gender`, `injury_date`.
 
-```{r, echo=TRUE, eval=FALSE}
+```{r}
 glimpse(tx_injuries)
 ```
-
-![glimpse](01_tt_37_files/Screenshot_20190910_113458.png)
 
 ## The code 4 - графици #2
 
 Template за графици
 
-```{r, echo=TRUE, eval=FALSE}
+```{r, eval = FALSE}
 ggplot(data = <DATA>) + 
   <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
 ```
@@ -183,7 +171,7 @@ Many `geoms`. They have a corresponding `stat` function that transforms the data
 
 ## The code 4 - графици #3
 
-```{r, echo=TRUE, eval=FALSE}
+```{r}
 ggplot(data = drop_na(tx_injuries, gender)) + 
   geom_histogram(mapping = aes(x = age, fill = gender), 
                  na.rm = TRUE, color="white") +
@@ -195,7 +183,7 @@ ggplot(data = drop_na(tx_injuries, gender)) +
 
 ## The code 4 - графици #4
 
-```{r, echo=TRUE, eval=FALSE}
+```{r}
 ggplot(data = drop_na(tx_injuries, gender)) + 
   geom_point(mapping = aes(x = age, y = injury_date, color=gender)) +
   labs(x="Година", y="Возраст") +
@@ -206,10 +194,8 @@ ggplot(data = drop_na(tx_injuries, gender)) +
 
 ## The code 5 - графици #5
 
-```{r, echo=TRUE, eval=FALSE}
-#install.packages("ggridges")
-
-library(ggridges)
+```{r}
+suppressPackageStartupMessages(library(ggridges))
 
 tx_injuries %>% select(age, gender, injury_date) %>%
   mutate(Month=month.name[month(injury_date)]) %>%
@@ -229,10 +215,7 @@ Homework: What was potentially wrong with the assumptions for the previous graph
 
 ## The code 7 - графици #6
 
-```{r, echo=TRUE, eval=FALSE}
-
-library(ggridges)
-
+```{r}
 tx_injuries %>% select(age, gender, injury_date) %>% 
   mutate(Month=month.name[month(injury_date)]) %>% 
   mutate(Year=factor(year(injury_date))) %>% 
@@ -252,4 +235,3 @@ tx_injuries %>% select(age, gender, injury_date) %>%
 - R for Data science (https://r4ds.had.co.nz/)
 - Advanced R (http://adv-r.had.co.nz/)
 - TidyTuesday podcast (https://podtail.com/podcast/tidy-tuesday/)
-
