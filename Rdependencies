@@ -8,3 +8,6 @@ quantmod
 BatchGetSymbols
 ggwordcloud
 tidytext
+ggrepel
+ggpubr
+ggforce
