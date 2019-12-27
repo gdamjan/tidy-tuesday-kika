@@ -1,5 +1,5 @@
 ---
-  title: '#TidyTuesday 5.11.2019: Bike & Walk Commutes'
+title: '#TidyTuesday 5.11.2019: Bike & Walk Commutes'
 author: "teofil"
 date: "5/11/2019"
 output:
