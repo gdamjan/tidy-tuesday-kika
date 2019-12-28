@@ -21,7 +21,7 @@ jobs:
 
     - name: install deps
       run: |
-          apt install -y libjpeg-dev libglu1-mesa-dev libglpk-dev
+          apt install -y libjpeg-dev libglu1-mesa-dev libglpk-dev libgeos-dev libudunits2-dev libgdal-dev
           make deps
 
     - name: compile all Rmd to htmls
