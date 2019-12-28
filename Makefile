@@ -13,7 +13,7 @@ all: $(HTMLS)
 
 deps:
 	# this should probably handle comments in the file
-	R CMD INSTALL --no-docs --no-multiarch `<Rdependencies`
+	Rscript -e 'install.packages(read.table("Rdependencies")[,1])'
 
 %.html : %.Rmd
 	Rscript -e "rmarkdown::render('$<')"
