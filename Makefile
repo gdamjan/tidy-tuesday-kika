@@ -12,8 +12,7 @@ TARGETS = $(HTMLS) $(FILES)
 all: $(HTMLS)
 
 deps:
-	# this should probably handle comments in the file
-	Rscript -e 'install.packages(read.table("Rdependencies")[,1])'
+	Rscript -e 'install.packages(read.table("Rdependencies", colClasses = "character")[,1])'
 
 %.html : %.Rmd
 	Rscript -e "rmarkdown::render('$<')"
