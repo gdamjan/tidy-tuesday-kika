@@ -20,7 +20,9 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: install deps
-      run: make deps
+      run: |
+          apt install -y libjpeg-dev libglu1-mesa-dev libglpk-dev
+          make deps
 
     - name: compile all Rmd to htmls
       run: make
