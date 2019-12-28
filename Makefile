@@ -19,7 +19,7 @@ deps:
 
 dist: $(HTMLS)
 	@mkdir -p $(DESTDIR)
-	cp -r -t $(DESTDIR) $(TARGETS)
+	cp -r -t $(DESTDIR) $(HTMLS)
 
 
 clean:
