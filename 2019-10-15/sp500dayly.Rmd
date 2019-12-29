@@ -11,7 +11,7 @@ output:
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
-                      warning = FALSE, message = FALSE)
+                      warning = FALSE, message = FALSE, eval = FALSE)
 ```
 
 
@@ -23,6 +23,7 @@ library("BatchGetSymbols")
 options(scipen = 999)
 ```
 
+Note: All of the code in this Rmd is `eval = FALSE` because the data doesn't properly load. 
 
 Functions. date_converter converts a date from the form 2019-10-11 to string "October 11, 2019" to use in naming the graphs later. is_weekend checks if the supplied date is on the weekend, and returns the date of the friday before that weekend, because stock markets close on weekends.
 
@@ -119,7 +120,6 @@ industry_perf
 
 ```{r fig.width=9, fig.height=6}
 
-windowsFonts(Ubuntu=windowsFont("Ubuntu"))
 
 ggplot(data=industry_perf, 
        mapping=aes(area=market_cap, 
