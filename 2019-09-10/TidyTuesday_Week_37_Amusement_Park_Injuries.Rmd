@@ -42,10 +42,6 @@ The tidyverse is an “opinionated collection of R packages designed for data sc
 - Податоци на [github](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10)
 - Добар пример за реални, 'валкани' податоци што треба да се исчистат. Ако на пример работите во осигурителна куќа и ви речат ајде да видиме што да се прави за полиси за осигурување за повреди во забавни паркови.
 
-## TidyTuesday hints за новите податоци
-
-A lot of free text this week, some inconsistent `NA`s (`n/a`, `N/A`) and dates (`ymd`, `dmy`). A good chance to do some data cleaning and then take a look at frequency, type of injury, and analyze free text.
-
 ## Libraties (packages) and data 
 
 Load the libraries
@@ -63,6 +59,8 @@ safer_parks <- readr::read_csv("https://raw.githubusercontent.com/rfordatascienc
 ```
 
 ## Средување NA вредности
+
+A lot of free text this week, some inconsistent `NA`s (`n/a`, `N/A`) and dates (`ymd`, `dmy`). A good chance to do some data cleaning and then take a look at frequency, type of injury, and analyze free text.
 
 Прашање: Колку сѐ можни форми на `NA` (not applicable) има во податоците?
 
@@ -117,7 +115,9 @@ tx_injuries_na_fixed <- tx_injuries %>%
   mutate_all(.funs = fix_na, na_strings = possible_na)
 ```
 
-## Чистење на Датуми со пакетот `lubridate`
+## Чистење на датуми 
+
+Со пакетот `lubridate`
 
 ```{r}
 
