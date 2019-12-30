@@ -6,12 +6,16 @@ output:
   html_document:
     df_print: paged
     toc: true
+    toc_float: true
 ---
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
                       warning = FALSE, message = FALSE)
 ```
+
+## `Post hoc` synopsis
+Ова веројатно е еден од покорисните документи за нови TidyTuesdayAtKIKA посетители. Вклучен е код за инспекција и чистење на проблематични варијабли, како текстуални така и нумерички (датуми). Има неколку типови на визуализации на податоците, со основен `ggplot2` код и специјализирани пакети. И има кратко теоретско објаснување за синтаксата на `ggplot2` како и неколку корисни кратенки за `RStudio`.
 
 
 ## Intro
@@ -22,16 +26,12 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 
 ## Recap
 
-- .Rmd (R Markdown) е околината во која ќе работиме;
-- Нов R Notebook: Мени: File -> New File -> R notebook
+- .Rmd (R Markdown) е околината во која ќе работиме бидејќи овозможува код, текст, коментари и аутпут да се презентираат заедно;
+- Нов R Notebook: Мени: `File -> New File -> R notebook`
 - Корисни кратенки:
-  - code chunks (ctrl+alt+i)
-  - pipes (ctrl+shift+m)
-  - view()
-
-## Околината на RStudio
-
-- Отвори RStudio
+  - insert code chunk (`ctrl+alt+i`), execute all above/below cursor (`ctr+alt+b`/`ctrl+alt+e`), 
+  - pipes (`ctrl+shift+m`) [not a true `bash` pipe. More a function to chain other functions]
+  - `view()`
 
 ## The tidyverse
 
@@ -40,21 +40,19 @@ The tidyverse is an “opinionated collection of R packages designed for data sc
 ## TidyTuesday 37 недела, 2 пат КИКА
 
 - Податоци на [github](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-10)
-- Добар пример за тоа ако на пример работите во осигурителна куќа и ви речат ајде да видиме што да се прави за полиси за осигурување за повреди во забавни паркови.
+- Добар пример за реални, 'валкани' податоци што треба да се исчистат. Ако на пример работите во осигурителна куќа и ви речат ајде да видиме што да се прави за полиси за осигурување за повреди во забавни паркови.
 
 ## TidyTuesday hints за новите податоци
 
-A lot of free text this week, some inconsistent NAs (n/a, N/A) and dates (ymd, dmy). A good chance to do some data cleaning and then take a look at frequency, type of injury, and analyze free text.
+A lot of free text this week, some inconsistent `NA`s (`n/a`, `N/A`) and dates (`ymd`, `dmy`). A good chance to do some data cleaning and then take a look at frequency, type of injury, and analyze free text.
 
-## The code 1
+## Libraties (packages) and data 
 
 Load the libraries
 
 ```{r}
 suppressPackageStartupMessages(library(tidyverse))
 ```
-
-## The code 2
 
 Load the data from github
 
@@ -64,20 +62,16 @@ tx_injuries <- readr::read_csv("https://raw.githubusercontent.com/rfordatascienc
 safer_parks <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
 ```
 
-## The code 3 - чистење на податоците #1 
+## Средување NA вредности
 
-1. Среди ги сите NA вредности
-
-Прашање: Колку сѐ можни форми на NA има во податоците?
+Прашање: Колку сѐ можни форми на `NA` (not applicable) има во податоците?
 
 ```{r}
 glimpse(tx_injuries)
 #map(tx_injuries, unique)
 ```
 
-## The code 3 - чистење на податоците #2
-
-"N/A", "n/a" - колку што можевме да видиме?  **na_if**
+Колку што можевме да видиме од `dplyr::glimpse()` командата, има:`N/A`, `n/a`. Можеме да ги конвертираме овие форми на `NA` во стандардна `R` `NA` со функцијата `dplyr::na_if()` (за потсетување, синтаксата со `::` означува `пакет::функција`).
 
 ```{r}
 tx_injuries <- tx_injuries %>% 
@@ -95,11 +89,11 @@ tx_injuries <- tx_injuries %>%
 #map(tx_injuries, unique)
 ```
 
-## The code 3 - чистење на податоците #3
+## Компјутеризирано барање на `NA`
 
-Комплицирано и компјутеризирано барање на NA (за домашна :))
+Очигледно е дека горниот приод каде повикуваме `na_if` за секоја варијабла и можна форма на `NA` не е многу ефикасен. Особено ако имаме посериозен проблем со повеќе колони со податоци кои сакаме да ги процесираме. Во пракса ваквото чистење на податоци најдобро се прави со custom функции, особено кога иста или слична трансформација треба да се аплицира на повеќе вектори (колони). 
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # make a function to mutate a column to fix NAs
 fix_na <- function(vect, na_strings) {
   vect[vect %in% na_strings] <- NA
@@ -113,16 +107,17 @@ possible_na <-
   filter(str_detect(value, "^n|^N"), str_length(value) < 5) %>%
   distinct(value, .keep_all = FALSE) %>%
   filter(!value %in% c("Neck", "Nose", "neck")) %>%
-  unlist %>%
-  unname()
+  pull(value)
 
+possible_na
+
+# apply our custom function to all columns 
+# while using all possible NA we just found
 tx_injuries_na_fixed <- tx_injuries %>% 
   mutate_all(.funs = fix_na, na_strings = possible_na)
 ```
 
-## The code 3 - чистење на податоците #4
-
-Датуми - **lubridate**
+## Чистење на Датуми со пакетот `lubridate`
 
 ```{r}
 
@@ -143,15 +138,13 @@ tx_injuries$injury_date
 ```
 
 
-## The code 4 - графици #1
+## Графици 101
 
 Ако се присетите на чистењето на податоците, некако излегува дека решивме да работиме со три променливи кои се различни по тип: `age`, `gender`, `injury_date`.
 
 ```{r}
 glimpse(tx_injuries)
 ```
-
-## The code 4 - графици #2
 
 Template за графици
 
@@ -168,8 +161,7 @@ Examples: `age` is mapped to `x`, `gender` is mapped to `fill`
 
 Many `geoms`. They have a corresponding `stat` function that transforms the data to make it suitable for the `geom` (?stat_boxplot)
 
-
-## The code 4 - графици #3
+## Histogram
 
 ```{r}
 ggplot(data = drop_na(tx_injuries, gender)) + 
@@ -181,7 +173,7 @@ ggplot(data = drop_na(tx_injuries, gender)) +
 ```
 
 
-## The code 4 - графици #4
+## Scatterplot
 
 ```{r}
 ggplot(data = drop_na(tx_injuries, gender)) + 
@@ -192,7 +184,22 @@ ggplot(data = drop_na(tx_injuries, gender)) +
   theme_minimal()
 ```
 
-## The code 5 - графици #5
+## Heatmap
+
+```{r}
+tx_injuries %>% select(age, gender, injury_date) %>% 
+  mutate(Month=month.name[month(injury_date)]) %>% 
+  mutate(Year=factor(year(injury_date))) %>% 
+  drop_na(Month, Year, gender) %>% 
+  group_by(Year, Month, gender) %>% 
+  tally() %>% 
+  ggplot(data=.) + 
+    geom_tile(aes(y=Month, x=Year, fill=n), color="white") +
+    facet_wrap("gender", ncol=2) +
+      theme_classic()
+```
+
+## Ridges
 
 ```{r}
 suppressPackageStartupMessages(library(ggridges))
@@ -209,25 +216,7 @@ tx_injuries %>% select(age, gender, injury_date) %>%
     facet_wrap("gender", ncol=2)
 ```
 
-## The code 6 - графици #5
-
 Homework: What was potentially wrong with the assumptions for the previous graph?
-
-## The code 7 - графици #6
-
-```{r}
-tx_injuries %>% select(age, gender, injury_date) %>% 
-  mutate(Month=month.name[month(injury_date)]) %>% 
-  mutate(Year=factor(year(injury_date))) %>% 
-  drop_na(Month, Year, gender) %>% 
-  group_by(Year, Month, gender) %>% 
-  tally() %>% 
-  ggplot(data=.) + 
-    geom_tile(aes(y=Month, x=Year, fill=n), color="white") +
-    facet_wrap("gender", ncol=2) +
-      theme_classic()
-```
-
 
 ## R референци
 
