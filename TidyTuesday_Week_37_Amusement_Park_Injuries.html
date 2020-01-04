@@ -2788,7 +2788,7 @@ div.tocify {
 
 
 <div id="post-hoc-synopsis" class="section level2">
-<h2><code>Post hoc</code> synopsis</h2>
+<h2><em>Post hoc</em> synopsis</h2>
 <p>Ова веројатно е еден од покорисните документи за нови TidyTuesdayAtKIKA посетители. Вклучен е код за инспекција и чистење на проблематични варијабли, како текстуални така и нумерички (датуми). Има неколку типови на визуализации на податоците, со основен <code>ggplot2</code> код и специјализирани пакети. И има кратко теоретско објаснување за синтаксата на <code>ggplot2</code> како и неколку корисни кратенки за <code>RStudio</code>.</p>
 </div>
 <div id="intro" class="section level2">
@@ -2832,10 +2832,6 @@ div.tocify {
 <li>Добар пример за реални, ‘валкани’ податоци што треба да се исчистат. Ако на пример работите во осигурителна куќа и ви речат ајде да видиме што да се прави за полиси за осигурување за повреди во забавни паркови.</li>
 </ul>
 </div>
-<div id="tidytuesday-hints-за-новите-податоци" class="section level2">
-<h2>TidyTuesday hints за новите податоци</h2>
-<p>A lot of free text this week, some inconsistent <code>NA</code>s (<code>n/a</code>, <code>N/A</code>) and dates (<code>ymd</code>, <code>dmy</code>). A good chance to do some data cleaning and then take a look at frequency, type of injury, and analyze free text.</p>
-</div>
 <div id="libraties-packages-and-data" class="section level2">
 <h2>Libraties (packages) and data</h2>
 <p>Load the libraries</p>
@@ -2847,6 +2843,7 @@ safer_parks &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rforda
 </div>
 <div id="средување-na-вредности" class="section level2">
 <h2>Средување NA вредности</h2>
+<p>A lot of free text this week, some inconsistent <code>NA</code>s (<code>n/a</code>, <code>N/A</code>) and dates (<code>ymd</code>, <code>dmy</code>). A good chance to do some data cleaning and then take a look at frequency, type of injury, and analyze free text.</p>
 <p>Прашање: Колку сѐ можни форми на <code>NA</code> (not applicable) има во податоците?</p>
 <pre class="r"><code>glimpse(tx_injuries)</code></pre>
 <pre><code>## Observations: 542
@@ -2905,8 +2902,9 @@ possible_na</code></pre>
 tx_injuries_na_fixed &lt;- tx_injuries %&gt;% 
   mutate_all(.funs = fix_na, na_strings = possible_na)</code></pre>
 </div>
-<div id="чистење-на-датуми-со-пакетот-lubridate" class="section level2">
-<h2>Чистење на Датуми со пакетот <code>lubridate</code></h2>
+<div id="чистење-на-датуми" class="section level2">
+<h2>Чистење на датуми</h2>
+<p>Со пакетот <code>lubridate</code></p>
 <pre class="r"><code>suppressPackageStartupMessages(library(lubridate))
 
 tx_injuries$injury_date</code></pre>
