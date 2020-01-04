@@ -1,37 +1,41 @@
 ---
-title: '#TidyTuesday 2 / 10.9.2019: Week 37 Amusement Park Injuries'
+title: '#TidyTuesday 3 / 17.9.2019: Week 38 US National Parks'
 author: "novica"
 date: "17/9/2019"
 output:
   html_document:
     df_print: paged
     toc: true
+    toc_float: true
 ---
-
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
                       warning = FALSE, message = FALSE)
 ```
 
+## _Post hoc_ synopsis
+
+Оваа недела се посветивме повеќе кон начинот на пишување `ggplot2` код, имено, дали сите естетики се подесуваат со еден повик до `aes` или секоја посебно. Слично пракса може да се примени и за други `ggplot2` фунцкии коишто доколку ги повикаме повторно не се во конфликт со претходниот код. Такви се на пример `labs` или `theme` (примери подолу). Слично може да се примени и со `dplyr::filter`, каде што често, но не секогаш, може да филтрираме податоци со синтаксата `filter(x="x", y="y")` или `filter(x="a") %>% filter(y="b")`. Ова е интересно од аспект на читливоста на кодот и иако бара повеќе пишување, долгата форма (со посебен `aes` за секоја естетика) можеби е подостапна за нови корисници. 
+
+Други новини во овој документ се однесуваат на стилизирање на `ggplot2` графици, со основни функции или додатни пакети (`ggridges`).
 
 ## Резиме
 
-- .Rmd (R Markdown) е околината во која ќе работиме;
-- Нов R Notebook: Мени: File -> New File -> R notebook
+- `.Rmd` (`R Markdown`) е околината во која ќе работиме
+- Нов `R Notebook`: Мени: `File -> New File -> R notebook`
 - Корисни кратенки:
-  - code chunks (ctrl+alt+i)
-  - pipes %>% (ctrl+shift+m)
-  - assignment ( <- )
-  - view()
+  - code chunks (`ctrl+alt+i`)
+  - pipes `%>%` (`ctrl+shift+m`)
+  - assignment `<-` (`alt+-`)
+  - `view()`
 
 ## Pipes expained, maybe
-
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">This is how I explain the &#39;pipe&#39; to <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> newbies... <a href="https://t.co/VdAFTLzijy">pic.twitter.com/VdAFTLzijy</a></p>&mdash; We are R-Ladies (@WeAreRLadies) <a href="https://twitter.com/WeAreRLadies/status/1172576445794803713?ref_src=twsrc%5Etfw">September 13, 2019</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-# Нов dataset
+## Нов dataset
 
 TidyTuesday 38: податоци од националните паркови во САД
 
@@ -39,9 +43,7 @@ TidyTuesday 38: податоци од националните паркови в
 💻 (@thomas_mock) <a href="https://twitter.com/thomas_mock/status/1173586589462740994?ref_src=twsrc%5Etfw">September 16, 2019</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
-## Бавен ggplot
-
-
+## Брз и бавен ggplot
 
 ### Вообичаено:
 
@@ -56,8 +58,6 @@ ggplot(my_data,
 ```
 
 (извор:[EvaMaeRey](https://github.com/EvaMaeRey/little_flipbooks_library/tree/master/minimal_example))
-
-
 
 ### Бавно:
 
@@ -84,9 +84,7 @@ park_visits <- readr::read_csv("https://raw.githubusercontent.com/rfordatascienc
 glimpse(park_visits)
 ```
 
-#Години и посетители #1
-
-
+## Вкупен број на посетители по години
 
 ```{r group_the_data_1}
 pv_grouped <- park_visits %>%
@@ -99,22 +97,7 @@ pv_grouped <- park_visits %>%
 pv_grouped
 ```
 
-# Години и посетители #2
-
-
-```{r group_the_data_2}
-pv_grouped <- park_visits %>%
-  filter(unit_type == "National Park") %>%
-  filter(!year == "Total") %>%
-  group_by(year) %>%
-  summarise_at(.vars = vars("visitors"),
-    .funs = list("visitors_per_year"=sum)) %>%
-  mutate(year = as.numeric(year))
-pv_grouped
-```
-
-## График за години и посетители #1
-
+Графички, горната табела може да ја прикажеме на следниот начин:
 
 ```{r national_parks_visitors_1}
  ggplot(data = pv_grouped) +
@@ -133,29 +116,7 @@ pv_grouped
     ggthemes::theme_fivethirtyeight()
 ```
 
-## График за години и посетители #2
-
-
-```{r national_parks_visitors_2}
- ggplot(data = pv_grouped) +
-    aes(x = year) +
-    aes(y = visitors_per_year / 10^6) +
-    geom_line(color = "forestgreen") +
-    geom_area(alpha = .3, fill = "forestgreen") +
-    scale_y_continuous(labels = scales::comma) +
-    scale_y_continuous(labels = scales::unit_format(unit = "M")) +
-    scale_x_continuous(breaks = seq(1910, 2016, 10),
-     labels = c(1910, paste("'", seq(20, 90, 10), sep = ""), 2000, "'10")) +
-    labs(x="") +
-    labs(y="") +
-    labs(title="U.S. national parks have never been so popular") +
-    labs(subtitle="Annial recreational visits to national parks since 1904") +
-    labs(caption="Source: National Parks Service") +
-    ggthemes::theme_fivethirtyeight()
-```
-
-## Најдобрите 10 паркови #1
-
+## Најдобрите 10 паркови
 
 ```{r group_the_data_3}
 top10 <- park_visits %>%
@@ -177,64 +138,10 @@ pv2_top10 <- filter(.data = pv2, unit_name %in% top10$unit_name)
 pv2_top10
 ```
 
-## Најдобрите 10 паркови #2
-
-
-```{r group_the_data_4}
-top10 <- park_visits %>%
-  filter(year == "Total") %>%
-  arrange(desc(visitors)) %>%
-  top_n(n = 10, wt=visitors)
-
-pv2 <- park_visits %>%
-  filter(!year == "Total") %>%
-  select(year, unit_name, visitors) %>%
-  group_by(year) %>%
-  mutate(year_rank = rank(-visitors)) %>%
-  ungroup %>%
-  mutate(year = as.numeric(year)) %>%
-  arrange(year, year_rank)
-
-pv2_top10 <- filter(.data = pv2, unit_name %in% top10$unit_name)
-
-pv2_top10
-```
-График за најдобрите 10 паркови #1
-
+И графички
 
 ```{r best_parks_1}
 library(ggridges)
-ord <- top10$unit_name[order(top10$visitors, decreasing = FALSE)]
-lbl <- str_remove(ord, "National Park")
-
-ggplot(data = pv2_top10) +
-  aes(x = year) +
-  aes(y = unit_name) +
-  aes(fill = unit_name) +
-  aes(group = unit_name) +
-  aes(height = visitors) +
-  aes(scale = .0000001) +
-  ggridges::geom_ridgeline(alpha = .5) +
-  theme_ridges() +
-  labs(y = "") +
-  labs(x = "") +
-  labs(title = "National park visitors per year") +
-  labs(subtitle = "The twenty most-visited parks overall") +
-  # theme(axis.text.y = element_text(size = 14)) +
-  scale_y_discrete(limits = ord, labels = lbl) +
-  scale_fill_cyclical(limits = ord, values = c("dodgerblue", "forestgreen")) +
-  scale_x_continuous(
-    limits = c(1950, 2016),
-    breaks = seq(1950, 2016, 10),
-    labels = c("1950", "'60", "'70", "'80", "'90", "2000", "'10")
-  ) +
-  ggthemes::theme_fivethirtyeight()
-```
-
-## График за најдобрите 10 паркови #2
-
-
-```{r best_parks_2}
 ord <- top10$unit_name[order(top10$visitors, decreasing = FALSE)]
 lbl <- str_remove(ord, "National Park")
 
