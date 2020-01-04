@@ -6,6 +6,7 @@ output:
   html_document:
     df_print: paged
     toc: true
+    toc_float: true
 ---
 
 
@@ -15,21 +16,22 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 ```
 
 
+# _Post hoc_ synopsis
+
+Во овој документ се посветивме повеќе на групирање на податоци според категорички вариабли и контруирање графици од такви групирани табели. Исто така дискутиравме малку повеќе за различните стилови на форматирање на код. Допревме малку на темата за користење на `tidyverse` пакети за поврзување со надворешни дата бази (без код). Конечно, воведовме и нов пакет за прикажување на географски податоци со фацети кои се позиционо (релативно) точни (`geofacet`).
 
 # Резиме
 
-- .Rmd (R Markdown) е околината во која ќе работиме;
-- Нов R Notebook: Мени: File -> New File -> R notebook
+- `.Rmd` (R Markdown) е околината во која ќе работиме;
+- Нов R Notebook: Мени: `File -> New File -> R notebook`
 - Корисни кратенки:
-  - code chunks (ctrl+alt+i)
-  - pipes %>% (ctrl+shift+m)
-  - assignment ( <- )
-  - view()
-- за едниот од графиконите ќе ви треба install.packages("geofacet")
-
+  - code chunks (`ctrl+alt+i`)
+  - pipes %>% (`ctrl+shift+m`)
+  - assignment ( `<-` )
+  - `view()`
+- за едниот од графиконите ќе ви треба `install.packages("geofacet")`
 
 # Повторување: што е бавен ggplot?
-
 
 „Бавен ggplot“ значи постепено пишување, наместо спојување на цели елементи заедно, како следи:
 
@@ -40,9 +42,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 - сите аргументи се пишуваат експлицитно: **aes(x = gdppercap)**, а не **aes(gdppercap)**
 - наредбите во **ggplot** се подредени така што реактивноста е очигледна; исто така прилагудувањата на **scale** се блиску до **aes**
 
-
-
-#Споредба на „обичен“ и „бавен“ ggplot
+# Споредба на „обичен“ и „бавен“ ggplot
 
 Вообичаено:
 
@@ -67,11 +67,9 @@ ggplot(data = my_data) +
   labs(title = "My title")
 ```
 
-
-
 # Почнувате
 
-Вчитајте го tidyverse.
+Вчитајте го `tidyverse`.
 
 ```{r}
 library(tidyverse)
@@ -83,15 +81,11 @@ library(tidyverse)
 school_diversity <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-24/school_diversity.csv") 
 ```
 
-
-
 # Ѕирнете ги податоците
 
 ```{r}
 glimpse(school_diversity)
 ```
-
-
 
 # Имињата на колоните со мали букви
 
@@ -101,22 +95,13 @@ glimpse(school_diversity)
 names(school_diversity) <- c("leaid", "lea_name", "state", "locale", "school_year", "aian", "asian", "black", "hispanic", "white", "multi", "total", "diverse", "variance", "int_group")
 ```
 
-
-
 # Две визуелизации, идеи?
-
 
 Секој круг да биде вредноста од **total**. Но тоа можеби се премногу податоци за на еден графикон (27.944). Можеби подобро групирање по тип (урбано/рурално/итн.) и посебни графикони (facet) да бидат регионите од САД. Но, нив ги нема во податоците.
 
-
-
 # Идеи, продолжено (за направи сам :-))
 
-
-
 По сличен начин на размислување, групирај ги податоците по држава и подели ги (facet) по региони, така што за секоја држава ќе има по еден **bar** што ќе покажува ентичка распределба на учениците.
-
-
 
 # Региони во САД? 
 
@@ -141,8 +126,6 @@ W_tbl  <- tibble(state=W.abrv,  region="West")
 
 Не ги знаев регионите, ги ископирав од [интернет](https://stackoverflow.com/questions/46066974/add-column-to-label-u-s-states-by-their-u-s-census-region).
 
-
-
 # Потоа спојуваме сѐ во еден tibble
 
 ```{r}
@@ -153,7 +136,6 @@ school_diversity_w_regions <- dplyr::left_join(x = school_diversity, y = region_
 
 Што е tibble? R специфичен формат на dataframe што се користи во tidyverse. Не мора да се грижите за тоа сега.
 
-
 # Конструктивна дигресија
 
 Можеби забележавте дека **спојувањето** се прави со **left_join**.
@@ -163,8 +145,6 @@ school_diversity_w_regions <- dplyr::left_join(x = school_diversity, y = region_
 Ова можеби е пренапредно за овој момент во учењето R, но убавото е во тоа што синтаксата е иста, ако научите **dplyr**, освен поврзување со датабазата што изгледа поразлично, сите други команди се исти.
 
 [dplyr](https://db.rstudio.com/dplyr/)
-
-
 
 ```{r mutate with case when}
 school_diversity <- school_diversity %>% 
@@ -177,9 +157,6 @@ school_diversity <- school_diversity %>%
   ))
 ```
 
-
-
-
 # Групирање
 
 ```{r group the data}
@@ -188,8 +165,6 @@ sd_grouped <- school_diversity_w_regions %>%
   summarise_at(vars("total"),
     list("total_per_locale"=sum))
 ```
-
-
 
 # Bubble (slow gg) plot
 
@@ -212,17 +187,11 @@ ggplot(data = drop_na(sd_grouped)) +
   guides(size=FALSE) 
 ```
 
-
-
-
-
 # Зошто bubble plot беше лоша идеја
 
 1. Не видов дека **SCHOOL_YEAR** се само две години, мислев дека е секоја учебна од 1994 до 2017.
 
 2. Дискусија?
-
-
 
 # Разноликост во американските училишта
 

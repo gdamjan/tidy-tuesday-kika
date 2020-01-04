@@ -4,8 +4,10 @@ author: "teofil"
 date: "3/10/2019"
 output:
   html_document:
-  df_print: paged
-toc: true
+    df_print: paged
+    toc: true
+    toc_float: true
+
 ---
   
 ```{r global_options, include=FALSE}
@@ -13,11 +15,21 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
                       warning = FALSE, message = FALSE)
 ```
 
+# _Post hoc_ synopsis
+
+Во овој документ навлеговме подлабоко во два значајни аспекти на работа со податоци. Прво, направивме едноставна линеарна регресија и ги разгледавме резултатите како графички така и преку `R` објекти за регресии. Ова ни даде еден пример за работа со вистински (неуредни, недостапни, неадекватни) податоци, бидејќи беше очигледно дека регресијата беше под влијание на мал дел од податоците кои беа грешни или неадекватни. Откако видовме кои се овие податоци, беше лесно да ги тргнеме од датасетот, што резултираше со регресија која имаше повеќе смисла.
+
+Втората значајна активност туке се однесува на користење на повеќе различни, но поврзани, табели за заедничко графирање. Типичен пример за ова е доколку сакаме да ги прикажеме сите податоци, но да го обрнеме вниманието на читателот на дел од податоците. Во вакви случаи вообичаено графираме еден слој (на пр., сиви точки) со сите податоци, и втор слој од обоени точки кои претставуваат накаква кондензација од сите податоци (средни вредности, суми, екстреми, итн.)
+
+# Неопходни библиотеки
+
 ```{r}
 library(tidyverse)
 library(ggrepel)
 library(ggpubr)
 ```
+
+# Еден од датасетите за пица
 
 ```{r}
 pizza_barstool <-
@@ -26,6 +38,8 @@ pizza_barstool <-
   )
 
 ```
+
+Дефинираме некои бои за консистентно боење низ документот
 
 ```{r}
 vv <- viridis::viridis(n = 9, alpha = .8, begin = .2 ,option = "C")[c(1,5,9)]
@@ -46,10 +60,10 @@ pzbs <-
   filter(review_stats_dave_average_score > 0.2)
 ```
 
-
 ## Some more wrangling
 
-Calculate the other two dataset that we created in the exploratory session .Color the pizzerias based on the degree of rating disagreement. First lets calculate the difference in rating.
+Calculate the other two dataset that we created in the exploratory session. Color the pizzerias based on the degree of rating disagreement. First lets calculate the difference in rating.
+
 ```{r}
 rate_diff <-
   pzbs %>%
@@ -69,7 +83,7 @@ rate_diff_top5 <- rate_diff %>%
   ungroup
 ```
 
-More modifications to this data frame  to make coordinates for segments  for manual labels.
+More modifications to this data frame to make coordinates for segments for manual labels.
 
 ```{r}
 rdt5 <- 
@@ -85,7 +99,7 @@ rdt5 <-
 
 ## Now we should have everything to build the plot
 
-### geoms
+### Geoms
 ```{r}
 PP <-
   ggplot(data = pzbs) +
@@ -125,7 +139,7 @@ PP <-
   )
 ```
 
-### scales
+### Scales
 
 ```{r}
 PP <- PP +
@@ -162,7 +176,7 @@ PP <- PP +
   scale_size_continuous(range = c(0.5, 8), guide = "none")
 ```
 
-## Labs
+### Labs
 
 ```{r}
 PP <- PP +
@@ -173,7 +187,7 @@ PP <- PP +
   labs(caption = "TidyTuesdayAtKIKA using pizza_barstool data")
 ```
 
-## Theme
+### Theme
 
 ```{r}
 PP <- PP +
