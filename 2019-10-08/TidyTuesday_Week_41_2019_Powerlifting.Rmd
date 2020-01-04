@@ -4,8 +4,9 @@ author: "teofil"
 date: "8/10/2019"
 output:
   html_document:
-  df_print: paged
-toc: true
+    df_print: paged
+    toc: true
+    toc_float: true
 ---
   
   ```{r global_options, include=FALSE}
@@ -13,10 +14,18 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
                       warning = FALSE, message = FALSE)
 ```
 
+# _Post hoc_ synopsis
+
+Во овој документ започнавме да разгледуваме процедури за линеарна регресија на групирани податоци. Со пакетите од `tidyverse` и `broom` можеме многу лесно да направиме регресија за секоја категорија (пол, тежина, натпреварување). Графирање на ваквите резултати е исто така лесно со овие платформи. Клучната техника тука е вгнездување (`nest()`) на подгрупите, вршење операции врз ваквите вгнездени податоци, и потоа 'одгнездување' на посакуваните елементи. Оваа е моќна техника, но не е наједноставна за совладување, бидејќи бара подетално познавање на структурата на `tibble`, `data.frame` и `list`. Овој документ може да служи како минимален вовед за овие процедури и објекти.
+
+# Неопходни пакети
+
 ```{r}
 library(tidyverse)
 library(broom)
 ```
+
+# Податоците
 
 ```{r}
 lifting <-
@@ -30,10 +39,9 @@ lifting <-
 glimpse(lifting)
 ```
 
-
 # Fitting models to grouped data
 
-Convert to long format  such that we have one column and  weight lifted.
+Convert to long format such that we have one column and weight lifted.
 
 ```{r}
 ll <- lifting_long <- 
@@ -45,7 +53,7 @@ ll <- group_by(ll, sex, type)
 
 ## Fit a model
 
-Now we can fit a linear model of  weight ~ boyweight  while keeping track of relevant  groupings.
+Now we can fit a linear model of  `weight ~ boyweight`  while keeping track of relevant groupings.
 
 Check these step by step  to see what nest does  what the map within mutate does  and unnest.
 

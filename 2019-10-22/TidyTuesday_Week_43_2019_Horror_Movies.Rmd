@@ -6,6 +6,7 @@ output:
   html_document:
     df_print: paged
     toc: true
+    toc_float: true
 ---
 
 
@@ -15,14 +16,14 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 ```
 
 
-Libraries
+# Libraries
 
 ```{r}
 library(tidyverse)
 ```
 
 
-Load the data
+# Load the data
 
 ```{r}
 horror_movies <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-22/horror_movies.csv")
