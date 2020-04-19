@@ -1,4 +1,4 @@
-name: CI
+name: make github-pages site
 
 # only build on push to master
 on:
