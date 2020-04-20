@@ -1,0 +1,32 @@
+name: docker image
+
+# the image is build from these files, so only
+# only trigger when one of them is changed
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - Dockerfile
+    - Makefile
+    - DESCRIPTION
+    - ubuntu-packages.list
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build and push image
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.repository_owner }}
+        repository: gdamjan/tidy-tuesday-kika
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        # repository: ${{ github.repository }}/tidy-tuesday-kika
+        # password: ${{ secrets.GITHUB_TOKEN }}
+        # registry: docker.pkg.github.com
+        tag_with_sha: true
+        tag_with_ref: true
+        add_git_labels: true
