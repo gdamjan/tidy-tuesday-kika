@@ -1,0 +1,23 @@
+# Dependencies installed from ubuntu 20.04 packages
+# if adding a new dependency, first check if a package exists at https://packages.ubuntu.com/
+
+# system dependencies
+pandoc
+r-base-core
+r-cran-devtools
+# build dependencies
+make
+g++
+gfortran
+libudunits2-dev
+libgeos-dev
+libgdal-dev
+# install cran packages to avoid installing from source
+r-cran-tidyverse
+r-cran-rmarkdown
+r-cran-ggridges
+r-cran-ggthemes
+r-cran-quantmod
+r-cran-ggrepel
+r-cran-ggforce
+r-cran-viridis
