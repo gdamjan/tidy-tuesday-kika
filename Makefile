@@ -1,8 +1,8 @@
 # helper function: recursively find files
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
-DESTDIR := $(PWD)/public
-SRCDIR  := $(PWD)
+DESTDIR := $(CURDIR)/public
+SRCDIR  := $(CURDIR)
 SOURCES := $(call rwildcard,$(SRCDIR),*.Rmd)
 HTMLS   := $(SOURCES:%.Rmd=%.html)
 FILES   := $(SOURCES:%.Rmd=%_files)
@@ -12,7 +12,8 @@ TARGETS = $(HTMLS) $(FILES)
 all: $(HTMLS)
 
 deps:
-	Rscript -e 'install.packages(read.table("Rdependencies", colClasses = "character")[,1])'
+	# Assumes r-cran-devtools is installed
+	Rscript -e 'devtools::install_deps(pkg=".", upgrade="never", repos="https://cloud.r-project.org/")'
 
 %.html : %.Rmd
 	Rscript -e "rmarkdown::render('$<')"

@@ -1,0 +1,26 @@
+Package: TidyTuesdayAtKIKA
+Title: Tidy Tuesday at KIKA
+Version: 0.1
+Authors@R: as.person(c(
+    ))
+Description: Slides and other resources from the #TidyTuesday events at KIKA
+Depends: R (>= 3.6.0)
+License: CC0
+LazyData: true
+Imports:
+    BatchGetSymbols,
+    geofacet,
+    gganimate,
+    ggforce,
+    ggpubr,
+    ggrepel,
+    ggridges,
+    ggthemes,
+    ggwordcloud,
+    quantmod,
+    rmarkdown,
+    tidytext,
+    tidyverse,
+    treemapify,
+    viridis,
+    xaringan
