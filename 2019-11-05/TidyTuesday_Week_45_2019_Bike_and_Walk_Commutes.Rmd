@@ -16,7 +16,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 ```{r}
 library(tidyverse)
 devtools::install_github("hrbrmstr/waffle")
-devtools::install_github("hrbrmstr/hrbrthemes")
+devtools::install_github("hrbrmstr/hrbrthemes", ref="v0.6.0")
 library(hrbrthemes)
 library(waffle)
 ```
