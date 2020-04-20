@@ -23,4 +23,9 @@ Imports:
     tidyverse,
     treemapify,
     viridis,
-    xaringan
+    xaringan,
+    hrbrthemes,
+    waffle
+Remotes:
+    hrbrmstr/hrbrthemes@v0.6.0,
+    hrbrmstr/waffle
