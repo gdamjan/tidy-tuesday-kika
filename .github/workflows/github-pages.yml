@@ -22,12 +22,10 @@ jobs:
       run: make deps
 
     - name: compile all Rmd to htmls
-      run: make
+      run: make DESTDIR=./public dist
 
     - name: prepare for distribution
-      run: |
-          make DESTDIR=./public dist
-          cp index.html ./public/
+      run: cp index.html ./public/
 
     - name: deploy to gh-pages
       uses: crazy-max/ghaction-github-pages@v1
