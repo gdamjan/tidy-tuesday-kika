@@ -11,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     # use a premade container with some R packages and needed dependencies
     container:
-      image: gdamjan/tidy-tuesday-kika:latest
-    #  image: docker.pkg.github.com/${{ github.repository_owner }}/tidytuesdayatkika/tidy-tuesday-kika:latest
+      image: ghcr.io/${{ github.repository_owner }}/tidy-tuesday-kika:latest
 
     steps:
     - uses: actions/checkout@v2
