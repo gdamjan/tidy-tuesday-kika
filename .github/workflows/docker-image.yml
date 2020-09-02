@@ -22,7 +22,7 @@ jobs:
     - name: Build and push image
       uses: docker/build-push-action@v1
       with:
-        password: ${{ secrets.GITHUB_CR_TOKEN }}
+        password: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
         username: ${{ github.repository_owner }}
         repository: ${{ github.repository_owner }}/tidy-tuesday-kika
         registry: ghcr.io
