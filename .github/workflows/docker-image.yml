@@ -11,6 +11,7 @@ on:
     - Makefile
     - DESCRIPTION
     - ubuntu-packages.list
+  workflow_dispatch:
 
 jobs:
   build:
