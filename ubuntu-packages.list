@@ -18,6 +18,8 @@ libcairo2-dev
 libgeos-dev
 libgdal-dev
 # install cran packages to avoid installing from source
+r-cran-foreign
+r-cran-xml
 r-cran-tidyverse
 r-cran-rmarkdown
 r-cran-gdtools
