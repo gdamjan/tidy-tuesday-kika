@@ -1,0 +1,35 @@
+name: github pages
+
+# only build on push to master
+on:
+  push:
+    branches:
+    - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # use a premade container with some R packages and needed dependencies
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/tidy-tuesday-kika:latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # most dependencies should be already in the above image, but just in case
+    - name: install deps
+      run: make deps
+
+    - name: compile all Rmd to htmls
+      run: make DESTDIR=./public dist
+
+    - name: prepare for distribution
+      run: cp index.html ./public/
+
+    - name: deploy to gh-pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        publish_branch: gh-pages
