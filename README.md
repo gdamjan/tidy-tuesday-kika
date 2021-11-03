@@ -1,3 +1,5 @@
+[![deploy github pages](https://github.com/gdamjan/tidy-tuesday-kika/actions/workflows/deploy-github-pages.yml/badge.svg)](https://github.com/gdamjan/tidy-tuesday-kika/actions/workflows/deploy-github-pages.yml)
+[![build docker image](https://github.com/gdamjan/tidy-tuesday-kika/actions/workflows/build-docker-image.yml/badge.svg)](https://github.com/gdamjan/tidy-tuesday-kika/actions/workflows/build-docker-image.yml)
 # TidyTuesday At KIKA
 
 Slides and other resources from the #TidyTuesday events at [KIKA](https://kika.spodeli.org) hacklab in Skopje.
