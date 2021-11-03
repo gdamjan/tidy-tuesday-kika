@@ -1,11 +1,11 @@
-name: docker image
+name: build docker image
 
 # the image is build from these files, so only
 # only trigger when one of them is changed
 on:
   push:
     branches:
-    - master
+    - main
     paths:
     - Dockerfile
     - Makefile
